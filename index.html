@@ -1649,8 +1649,7 @@ async function payTrial() {
       type: 'trial'
     },
     theme: { color: '#ad3737' },
-    handler: async function(resp) {
-      await notifyWebhook({ ...data, type: 'trial', payment_id: resp.razorpay_payment_id, amount: 149 });
+    handler: function(resp) {
       const params = new URLSearchParams({
         name: data.name,
         date: data.deliveryDate,
