@@ -1344,8 +1344,41 @@ input:focus, select:focus, textarea:focus {
           <label>Pin Code</label>
           <input type="text" id="t-pin" placeholder="682001" maxlength="6">
         </div>
-          <input type="date" id="t-delivery-date" onchange="validateDeliveryDate(this)">
-          <p class="form-note" style="margin-top:6px; margin-bottom:0; color:var(--muted); font-size:12px; line-height:1.5;">Orders are dispatched on the next available weekday.</p>
+        <!-- hidden real value holder -->
+        <input type="hidden" id="t-delivery-date">
+        <div class="fg" style="margin-top:14px;">
+          <label>Preferred Delivery Date</label>
+          <!-- trigger button -->
+          <div id="cal-trigger" onclick="toggleCalendar()" style="
+            display:flex; align-items:center; justify-content:space-between;
+            border:1.5px solid #e8d5d5; border-radius:10px; padding:11px 14px;
+            cursor:pointer; background:var(--white); font-size:15px;
+            color:var(--dark); user-select:none; transition:border-color 0.2s;">
+            <span id="cal-display">Select a date</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ad3737" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <!-- custom calendar popover -->
+          <div id="cal-popover" style="display:none; margin-top:6px; border:1.5px solid #e8d5d5; border-radius:14px; overflow:hidden; background:var(--white); box-shadow:0 8px 32px rgba(173,55,55,0.13);">
+            <!-- month nav -->
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px 8px; border-bottom:1px solid #f3e8e8;">
+              <button type="button" id="cal-prev" onclick="calChangeMonth(-1)" style="background:none;border:none;cursor:pointer;font-size:18px;color:#ad3737;padding:2px 8px;border-radius:6px;line-height:1;">&#8249;</button>
+              <span id="cal-month-label" style="font-family:'Cormorant Garamond',serif; font-size:17px; font-weight:600; color:var(--dark);"></span>
+              <button type="button" id="cal-next" onclick="calChangeMonth(1)" style="background:none;border:none;cursor:pointer;font-size:18px;color:#ad3737;padding:2px 8px;border-radius:6px;line-height:1;">&#8250;</button>
+            </div>
+            <!-- day headers -->
+            <div style="display:grid; grid-template-columns:repeat(7,1fr); text-align:center; padding:8px 10px 4px; gap:2px;">
+              <span style="font-size:11px;font-weight:600;color:var(--muted);">Mo</span>
+              <span style="font-size:11px;font-weight:600;color:var(--muted);">Tu</span>
+              <span style="font-size:11px;font-weight:600;color:var(--muted);">We</span>
+              <span style="font-size:11px;font-weight:600;color:var(--muted);">Th</span>
+              <span style="font-size:11px;font-weight:600;color:var(--muted);">Fr</span>
+              <span style="font-size:11px;font-weight:600;color:var(--muted);">Sa</span>
+              <span style="font-size:11px;font-weight:600;color:#ad3737;">Su</span>
+            </div>
+            <!-- day grid -->
+            <div id="cal-grid" style="display:grid; grid-template-columns:repeat(7,1fr); padding:4px 10px 12px; gap:3px;"></div>
+          </div>
+          <p class="form-note" style="margin-top:6px; margin-bottom:0; color:var(--muted); font-size:12px; line-height:1.5;">We deliver on <strong style="color:#ad3737;">Sundays, Tuesdays &amp; Fridays</strong> only. Delivery runs between <strong style="color:#ad3737;">4PM – 6PM</strong>.</p>
           <p id="t-date-error" style="display:none; margin-top:5px; margin-bottom:0; font-size:12px; color:#ad3737; font-weight:500;"></p>
         </div>
         <div class="fg-row">
@@ -1516,53 +1549,161 @@ function updateBowl2() {
   });
 }
 
-// ─── Delivery Date Logic ───────────────────────────────────────────────
-function getNextWeekday() {
-  const d = new Date();
+// ─── Custom Delivery Calendar ──────────────────────────────────────────
+// Blendbar delivers on Sundays (0), Tuesdays (2), and Fridays (5) only.
+const DELIVERY_DAYS = [0, 2, 5];
+
+let calViewYear, calViewMonth, calSelectedDate;
+
+function toDateString(d) {
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function getNextDeliveryDay(fromDate) {
+  const d = fromDate ? new Date(fromDate) : new Date();
+  d.setHours(0,0,0,0);
   d.setDate(d.getDate() + 1); // start from tomorrow
-  while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1);
+  while (!DELIVERY_DAYS.includes(d.getDay())) d.setDate(d.getDate() + 1);
   return d;
 }
 
-function toDateString(d) {
-  return d.toISOString().split('T')[0];
+function formatDisplayDate(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
 }
 
-function initDeliveryDate() {
-  const input = document.getElementById('t-delivery-date');
-  if (!input) return;
-  const minDate = getNextWeekday();
-  input.min = toDateString(minDate);
-  input.value = toDateString(minDate);
+function toggleCalendar() {
+  const pop = document.getElementById('cal-popover');
+  if (pop.style.display === 'none') {
+    pop.style.display = 'block';
+    renderCalGrid();
+  } else {
+    pop.style.display = 'none';
+  }
 }
 
-function validateDeliveryDate(input) {
-  const errorEl = document.getElementById('t-date-error');
-  const chosen = new Date(input.value + 'T00:00:00');
-  const day = chosen.getDay();
+function calChangeMonth(delta) {
+  calViewMonth += delta;
+  if (calViewMonth > 11) { calViewMonth = 0; calViewYear++; }
+  if (calViewMonth < 0)  { calViewMonth = 11; calViewYear--; }
+  renderCalGrid();
+}
+
+function renderCalGrid() {
+  const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('cal-month-label').textContent = `${MONTH_NAMES[calViewMonth]} ${calViewYear}`;
+
   const today = new Date(); today.setHours(0,0,0,0);
-  const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
-  while (tomorrow.getDay() === 0 || tomorrow.getDay() === 6) tomorrow.setDate(tomorrow.getDate() + 1);
+  const earliest = getNextDeliveryDay(); // first selectable day
 
-  if (day === 0 || day === 6) {
-    errorEl.textContent = 'We only deliver on weekdays — your date has been moved to the next available day.';
-    errorEl.style.display = 'block';
-    input.value = toDateString(tomorrow);
-    setTimeout(() => { errorEl.style.display = 'none'; }, 4500);
-    return false;
+  const firstDay = new Date(calViewYear, calViewMonth, 1);
+  const lastDay  = new Date(calViewYear, calViewMonth + 1, 0);
+
+  // Monday-first offset (0=Mon … 6=Sun)
+  let startOffset = firstDay.getDay(); // 0=Sun … 6=Sat
+  startOffset = startOffset === 0 ? 6 : startOffset - 1;
+
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+
+  // blank cells before the 1st
+  for (let i = 0; i < startOffset; i++) {
+    const blank = document.createElement('div');
+    grid.appendChild(blank);
   }
-  if (chosen < tomorrow) {
-    errorEl.textContent = 'Same-day delivery is unavailable. The earliest available date has been selected for you.';
-    errorEl.style.display = 'block';
-    input.value = toDateString(tomorrow);
-    setTimeout(() => { errorEl.style.display = 'none'; }, 4000);
-    return false;
+
+  for (let day = 1; day <= lastDay.getDate(); day++) {
+    const d = new Date(calViewYear, calViewMonth, day);
+    const isDelivery = DELIVERY_DAYS.includes(d.getDay());
+    const isPast     = d < earliest;
+    const isSelected = calSelectedDate && toDateString(d) === calSelectedDate;
+
+    const cell = document.createElement('div');
+    cell.textContent = day;
+    cell.style.cssText = `
+      text-align:center; padding:7px 2px; border-radius:50%; font-size:14px;
+      line-height:1; aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+      transition: background 0.15s, color 0.15s;
+    `;
+
+    if (isSelected) {
+      cell.style.background = '#ad3737';
+      cell.style.color = '#fff';
+      cell.style.fontWeight = '700';
+      cell.style.cursor = 'default';
+    } else if (isPast || !isDelivery) {
+      cell.style.color = '#d4c0c0';
+      cell.style.cursor = 'default';
+      cell.style.opacity = '0.45';
+    } else {
+      // available delivery day — red number, clickable
+      cell.style.color = '#ad3737';
+      cell.style.fontWeight = '600';
+      cell.style.cursor = 'pointer';
+      cell.addEventListener('mouseenter', () => { cell.style.background = '#fdf0f0'; });
+      cell.addEventListener('mouseleave', () => { cell.style.background = ''; });
+      cell.addEventListener('click', () => calSelectDate(toDateString(d)));
+    }
+
+    grid.appendChild(cell);
   }
-  errorEl.style.display = 'none';
-  return true;
+
+  // Disable prev arrow if viewing current or earlier month
+  const prevBtn = document.getElementById('cal-prev');
+  const now = new Date();
+  prevBtn.disabled = (calViewYear < now.getFullYear()) ||
+                     (calViewYear === now.getFullYear() && calViewMonth <= now.getMonth());
+  prevBtn.style.opacity = prevBtn.disabled ? '0.25' : '1';
 }
 
-document.addEventListener('DOMContentLoaded', initDeliveryDate);
+function calSelectDate(dateStr) {
+  calSelectedDate = dateStr;
+  document.getElementById('t-delivery-date').value = dateStr;
+  document.getElementById('cal-display').textContent = formatDisplayDate(dateStr);
+  document.getElementById('cal-display').style.color = 'var(--dark)';
+  document.getElementById('cal-trigger').style.borderColor = '#ad3737';
+  document.getElementById('cal-popover').style.display = 'none';
+}
+
+function initDeliveryCalendar() {
+  const earliest = getNextDeliveryDay();
+  calViewYear  = earliest.getFullYear();
+  calViewMonth = earliest.getMonth();
+  // pre-select the earliest delivery day (writes hidden input + updates trigger label)
+  calSelectedDate = toDateString(earliest);
+  document.getElementById('t-delivery-date').value = calSelectedDate;
+  document.getElementById('cal-display').textContent = formatDisplayDate(calSelectedDate);
+  document.getElementById('cal-display').style.color = 'var(--dark)';
+  document.getElementById('cal-trigger').style.borderColor = '#ad3737';
+  // pre-render the grid so it's populated when user first clicks open
+  renderCalGrid();
+  document.getElementById('cal-popover').style.display = 'none';
+}
+
+// Close calendar when clicking outside
+document.addEventListener('click', function(e) {
+  const popover = document.getElementById('cal-popover');
+  const trigger = document.getElementById('cal-trigger');
+  if (popover && trigger && !popover.contains(e.target) && !trigger.contains(e.target)) {
+    popover.style.display = 'none';
+  }
+});
+
+// validateDeliveryDate kept for compatibility with validateTrial()
+function validateDeliveryDate() {
+  const val = document.getElementById('t-delivery-date').value;
+  if (!val) return false;
+  const d = new Date(val + 'T00:00:00');
+  const earliest = getNextDeliveryDay();
+  return DELIVERY_DAYS.includes(d.getDay()) && d >= earliest;
+}
+
+document.addEventListener('DOMContentLoaded', initDeliveryCalendar);
 // ───────────────────────────────────────────────────────────────────────
 
 function validateTrial() {
@@ -1578,7 +1719,7 @@ function validateTrial() {
   if (!name || !phone || !addr || !pin || !email || !bowl1 || !bowl2) {
     alert('Please fill in all fields.'); return null;
   }
-  if (!deliveryDate || !validateDeliveryDate(document.getElementById('t-delivery-date'))) {
+  if (!deliveryDate || !validateDeliveryDate()) {
     alert('Please select a valid preferred delivery date.'); return null;
   }
   const digits = phone.replace(/\D/g, '');
