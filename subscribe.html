@@ -1445,7 +1445,7 @@ src="https://www.facebook.com/tr?id=1555365275749866&ev=PageView&noscript=1"/></
     </div>
     <h2>You're all set!</h2>
     <p>Thanks for subscribing to Blendbar. Our team will be in touch shortly to confirm your first delivery date.</p>
-    <p style="margin-bottom:0;font-size:.82rem;">Questions? Reach us at <a href="tel:+917356664464" style="color:var(--red);text-decoration:none;font-weight:500;">+91 73566 64464</a></p>
+    <p style="margin-bottom:0;font-size:.82rem;">Questions? Reach us at <a href="tel:+917356433564" style="color:var(--red);text-decoration:none;font-weight:500;">+91 73566 64464</a></p>
   </div>
 
 
@@ -1814,7 +1814,7 @@ src="https://www.facebook.com/tr?id=1555365275749866&ev=PageView&noscript=1"/></
           } catch(e) {
             console.warn('Capture webhook failed:', e);
           }
-          showSuccess();
+          showSuccess(data);
         },
         modal: { ondismiss: resetBtn }
       });
@@ -1826,13 +1826,28 @@ src="https://www.facebook.com/tr?id=1555365275749866&ev=PageView&noscript=1"/></
     }
   }
 
-  function showSuccess() {
-    document.getElementById('step2').classList.remove('active');
-    document.getElementById('step3').classList.add('active');
-    document.getElementById('step2-ind').classList.remove('active');
-    document.getElementById('step2-ind').classList.add('done');
-    document.getElementById('step3-ind').classList.add('active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  function showSuccess(data) {
+    // Store order data for confirmation page
+    try {
+      localStorage.setItem('blendbar_sub_order', JSON.stringify({
+        name:                data.name,
+        phone:               data.phone,
+        plan:                data.plan,
+        planKey:             data.planKey,
+        first_delivery_date: data.first_delivery_date,
+        address:             data.address,
+        pincode:             data.pincode,
+        flavours:            [
+          data.mon_pref !== 'No preference' ? 'Mon: ' + data.mon_pref : null,
+          data.tue_pref !== 'No preference' ? 'Tue: ' + data.tue_pref : null,
+          data.wed_pref !== 'No preference' ? 'Wed: ' + data.wed_pref : null,
+          data.thu_pref !== 'No preference' ? 'Thu: ' + data.thu_pref : null,
+          data.fri_pref !== 'No preference' ? 'Fri: ' + data.fri_pref : null
+        ].filter(Boolean).join(' | ') || 'No preference',
+        skipDays:            data.skipDays
+      }));
+    } catch(e) {}
+    window.location.href = 'subscribe_confirmation.html';
   }
 
   document.addEventListener('DOMContentLoaded', function () {
