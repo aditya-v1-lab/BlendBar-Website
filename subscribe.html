@@ -1617,7 +1617,7 @@ src="https://www.facebook.com/tr?id=1555365275749866&ev=PageView&noscript=1"/></
 
       if (data.valid) {
         promoCode = code;
-        promoDiscount = data.discount_amount || 200;
+        promoDiscount = parseInt(data.discount_amount) || 200;
         const finalPrice = parseInt(selectedPlanEl.dataset.price) - promoDiscount;
 
         feedback.className = 'promo-feedback success';
