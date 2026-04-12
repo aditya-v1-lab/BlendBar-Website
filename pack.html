@@ -888,6 +888,15 @@ async function startPayment() {
     image: 'https://blendbarnutrition.in/favicon.ico',
     handler: function(response) {
       const dateFormatted = document.getElementById('confirm-date').textContent;
+      // Fire promo write-back webhook if a promo code was used
+      if (promoCode) {
+        fetch('https://hook.eu1.make.com/4n6qp2lwvf4i182fvk308v2qhdjtl9ue', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: promoCode, phone })
+        }).catch(() => {}); // silent fail — order is already paid
+      }
+
       // Fire Sheets webhook (fire-and-forget)
       fetch('https://hook.eu1.make.com/vxcoywyju7dg9nhknqmyhkdcvwegzit1', {
         method: 'POST',
@@ -966,11 +975,7 @@ async function applyPromoCode() {
     const resp = await fetch(PROMO_VALIDATE_WEBHOOK, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        code,
-        phone,
-        order_total: PACKS[packSize].price
-      })
+      body: JSON.stringify({ code, phone, order_total: PACKS[packSize].price })
     });
     const text = await resp.text();
     let data;
@@ -978,7 +983,6 @@ async function applyPromoCode() {
 
     if (data.valid) {
       promoCode = code;
-      // Calculate discount from percent returned by Make
       const discountPct = data.discount_percent || 0;
       promoDiscount = Math.round(PACKS[packSize].price * discountPct / 100);
       const finalPrice = PACKS[packSize].price - promoDiscount;
