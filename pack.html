@@ -930,7 +930,7 @@ async function startPayment() {
 }
 
 // ── PROMO CODE ──────────────────────────────────────────────────────────
-const PROMO_VALIDATE_WEBHOOK = 'https://hook.eu1.make.com/gyrudo795qc2mmh3gxjh281chinvj6vv';
+const PROMO_VALIDATE_WEBHOOK = 'https://hook.eu1.make.com/txhcyl3qpcmi0xdvrrcoob2fsbhy6sn8';
 let promoCode = null;
 let promoDiscount = 0;
 
@@ -940,13 +940,23 @@ async function applyPromoCode() {
   const feedback = document.getElementById('promo-feedback');
   const banner = document.getElementById('promo-savings-banner');
   const code = input.value.trim().toUpperCase();
+  const phone = document.getElementById('f-phone').value.trim();
 
   if (!code) return;
+
+  // Require phone number before checking promo
+  if (!phone || !/^[6-9]\d{9}$/.test(phone)) {
+    feedback.className = 'promo-feedback error';
+    feedback.style.display = 'flex';
+    feedback.textContent = '✕ Please enter your phone number above before applying a promo code.';
+    return;
+  }
 
   promoCode = null;
   promoDiscount = 0;
   feedback.className = 'promo-feedback';
   feedback.textContent = '';
+  feedback.style.display = 'none';
   banner.classList.remove('active');
 
   btn.textContent = 'Checking…';
@@ -956,7 +966,11 @@ async function applyPromoCode() {
     const resp = await fetch(PROMO_VALIDATE_WEBHOOK, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code })
+      body: JSON.stringify({
+        code,
+        phone,
+        order_total: PACKS[packSize].price
+      })
     });
     const text = await resp.text();
     let data;
@@ -964,24 +978,29 @@ async function applyPromoCode() {
 
     if (data.valid) {
       promoCode = code;
-      promoDiscount = data.discount_amount || 0;
+      // Calculate discount from percent returned by Make
+      const discountPct = data.discount_percent || 0;
+      promoDiscount = Math.round(PACKS[packSize].price * discountPct / 100);
       const finalPrice = PACKS[packSize].price - promoDiscount;
 
       feedback.className = 'promo-feedback success';
+      feedback.style.display = 'flex';
       feedback.textContent = '✓ Code applied!';
 
       document.getElementById('promo-savings-text').textContent =
-        'Promo "' + code + '" applied — ₹' + promoDiscount + ' off. You pay ₹' + finalPrice.toLocaleString('en-IN') + '.';
+        'Promo "' + code + '" applied — ' + discountPct + '% off (₹' + promoDiscount + '). You pay ₹' + finalPrice.toLocaleString('en-IN') + '.';
       banner.classList.add('active');
 
       document.getElementById('step2-price').innerHTML =
         '<s style="opacity:.5;font-size:0.85rem;">₹' + PACKS[packSize].price + '</s> ₹' + finalPrice;
     } else {
       feedback.className = 'promo-feedback error';
+      feedback.style.display = 'flex';
       feedback.textContent = '✕ ' + (data.message || 'Invalid or expired promo code.');
     }
   } catch(e) {
     feedback.className = 'promo-feedback error';
+    feedback.style.display = 'flex';
     feedback.textContent = '✕ Could not verify code. Please try again.';
   }
 
