@@ -7,6 +7,20 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Meta Pixel -->
+  <script>
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}
+  (window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '1555365275749866');
+  fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=1555365275749866&ev=PageView&noscript=1"
+  /></noscript>
+  <!-- End Meta Pixel -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <style>
     :root {
@@ -757,6 +771,12 @@ function goToStep2() {
   document.getElementById('step2-price').textContent = '₹' + PACKS[packSize].price;
   // Initialize the custom calendar
   initPackCalendar();
+  // Meta Pixel: user selected a pack and is moving to details
+  fbq('track', 'InitiateCheckout', {
+    content_name: PACKS[packSize].label,
+    value: PACKS[packSize].price,
+    currency: 'INR'
+  });
   goToStep(2);
 }
 
@@ -823,6 +843,12 @@ function goToStep3() {
   if (notes) { document.getElementById('confirm-notes').textContent = notes; notesRow.style.display = 'flex'; }
   else { notesRow.style.display = 'none'; }
 
+  // Meta Pixel: user filled details and is on the confirm/pay screen
+  fbq('track', 'AddPaymentInfo', {
+    content_name: PACKS[packSize].label,
+    value: finalPrice,
+    currency: 'INR'
+  });
   goToStep(3);
 }
 
@@ -922,6 +948,12 @@ async function startPayment() {
       document.getElementById('ty-name').textContent = name;
       document.getElementById('ty-date').textContent = document.getElementById('confirm-date').textContent;
       document.getElementById('ty-payment-id').textContent = response.razorpay_payment_id;
+      // Meta Pixel: successful purchase
+      fbq('track', 'Purchase', {
+        content_name: pack.label,
+        value: finalPrice,
+        currency: 'INR'
+      });
       goToStep(4);
     },
     modal: {
