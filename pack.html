@@ -22,6 +22,8 @@
   /></noscript>
   <!-- End Meta Pixel -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     :root {
       --red:       #ad3737;
@@ -325,6 +327,31 @@
       gap: 8px;
     }
     .promo-savings-banner.active { display: flex; }
+
+    /* ── LOCATION PIN ── */
+    .location-section { margin-bottom: 0; }
+    .location-btns { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+    .btn-loc {
+      flex: 1; min-width: 140px; display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 11px 16px; border-radius: 9px; border: 1.5px solid var(--red-blush);
+      background: var(--cream); font-family: 'Outfit', sans-serif; font-size: 0.85rem;
+      font-weight: 500; color: var(--mid); cursor: pointer; transition: all 0.2s;
+    }
+    .btn-loc:hover { border-color: var(--red); color: var(--red); background: var(--red-pale); }
+    .btn-loc.active { border-color: var(--red); background: var(--red-pale); color: var(--red); font-weight: 600; }
+    .btn-loc svg { flex-shrink: 0; }
+    .loc-status { font-size: 0.78rem; color: var(--mid); margin-bottom: 10px; min-height: 18px; display: flex; align-items: center; gap: 6px; }
+    .loc-status.success { color: #2e7d32; }
+    .loc-status.error   { color: #c0392b; }
+    #location-map-wrap {
+      display: none; border-radius: 12px; overflow: hidden;
+      border: 1.5px solid var(--red-blush); height: 240px; margin-bottom: 6px;
+    }
+    #location-map-wrap.visible { display: block; }
+    #location-map { width: 100%; height: 100%; }
+    .loc-coords { font-size: 0.72rem; color: var(--muted); margin-top: 4px; }
+    .loc-coords span { color: var(--dark); font-weight: 500; }
+    .loc-optional-note { font-size: 0.72rem; color: var(--muted); font-style: italic; margin-top: 6px; }
   </style>
 </head>
 <body>
@@ -492,6 +519,31 @@
           <div class="field-err" id="err-f-date" style="display:none;">Please select a delivery date</div>
         </div>
       </div>
+
+      <!-- Location Pin -->
+      <div class="form-row single location-section">
+        <div class="field">
+          <label>Drop Pin <span style="font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0;">(optional — helps our driver find you)</span></label>
+          <div class="location-btns">
+            <button type="button" class="btn-loc" id="btn-detect-loc">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
+              Detect my location
+            </button>
+            <button type="button" class="btn-loc" id="btn-pick-map">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              Pick on map
+            </button>
+          </div>
+          <div class="loc-status" id="loc-status"></div>
+          <div id="location-map-wrap"><div id="location-map"></div></div>
+          <div class="loc-coords" id="loc-coords" style="display:none;">
+            Pinned: <span id="loc-lat-display">—</span>, <span id="loc-lng-display">—</span>
+            · <a id="loc-gmaps-link" href="#" target="_blank" style="color:var(--red);text-decoration:none;font-weight:500;">Open in Maps ↗</a>
+          </div>
+          <input type="hidden" id="f-lat">
+          <input type="hidden" id="f-lng">
+        </div>
+      </div>
     </div>
 
     <!-- Allergies -->
@@ -575,6 +627,10 @@
       <div class="confirm-row" id="confirm-notes-row" style="display:none;">
         <div class="cr-label">Instructions</div>
         <div class="cr-value" id="confirm-notes">—</div>
+      </div>
+      <div class="confirm-row" id="confirm-location-row" style="display:none;">
+        <div class="cr-label">Pin</div>
+        <div class="cr-value" id="confirm-location">—</div>
       </div>
     </div>
 
@@ -843,6 +899,17 @@ function goToStep3() {
   if (notes) { document.getElementById('confirm-notes').textContent = notes; notesRow.style.display = 'flex'; }
   else { notesRow.style.display = 'none'; }
 
+  const locLat = document.getElementById('f-lat').value;
+  const locLng = document.getElementById('f-lng').value;
+  const locRow = document.getElementById('confirm-location-row');
+  if (locLat && locLng) {
+    const mapsUrl = `https://maps.google.com/?q=${locLat},${locLng}`;
+    document.getElementById('confirm-location').innerHTML = `${parseFloat(locLat).toFixed(5)}, ${parseFloat(locLng).toFixed(5)} &nbsp;<a href="${mapsUrl}" target="_blank" style="color:var(--red);font-size:0.8rem;">View ↗</a>`;
+    locRow.style.display = 'flex';
+  } else {
+    locRow.style.display = 'none';
+  }
+
   // Meta Pixel: user filled details and is on the confirm/pay screen
   fbq('track', 'AddPaymentInfo', {
     content_name: PACKS[packSize].label,
@@ -863,6 +930,9 @@ async function startPayment() {
   const date = document.getElementById('f-date').value;
   const notes = document.getElementById('f-notes').value.trim();
   const email = document.getElementById('f-email').value.trim();
+  const lat = document.getElementById('f-lat').value;
+  const lng = document.getElementById('f-lng').value;
+  const mapsLink = (lat && lng) ? `https://maps.google.com/?q=${lat},${lng}` : '';
 
   // Show loading overlay
   const payBtn = document.querySelector('#panel-3 .btn-pay');
@@ -885,7 +955,10 @@ async function startPayment() {
         address,
         pin,
         delivery_date: date,
-        notes
+        notes,
+        latitude: lat || null,
+        longitude: lng || null,
+        maps_link: mapsLink || null
       })
     });
     const data = await res.json();
@@ -937,7 +1010,10 @@ async function startPayment() {
           flavour: getFlavoursFlat(),
           notes_allergy: notes,
           payment_id: response.razorpay_payment_id,
-          email_address: email
+          email_address: email,
+          latitude: lat || null,
+          longitude: lng || null,
+          maps_link: mapsLink || null
         })
       }).catch(() => {}); // silent fail — order is already paid
 
@@ -969,6 +1045,132 @@ async function startPayment() {
   const rzp = new Razorpay(options);
   rzp.open();
 }
+
+// ── LOCATION PIN ────────────────────────────────────────────────────────
+let locMap = null;
+let locMarker = null;
+const KOCHI_LATLNG = [9.9312, 76.2673]; // default map center
+
+function setLocPin(lat, lng, statusMsg) {
+  const latRound = parseFloat(lat.toFixed(6));
+  const lngRound = parseFloat(lng.toFixed(6));
+
+  document.getElementById('f-lat').value = latRound;
+  document.getElementById('f-lng').value = lngRound;
+
+  const mapsUrl = `https://maps.google.com/?q=${latRound},${lngRound}`;
+  document.getElementById('loc-lat-display').textContent = latRound;
+  document.getElementById('loc-lng-display').textContent = lngRound;
+  document.getElementById('loc-gmaps-link').href = mapsUrl;
+  document.getElementById('loc-coords').style.display = 'block';
+
+  const statusEl = document.getElementById('loc-status');
+  statusEl.className = 'loc-status success';
+  statusEl.innerHTML = '✓ ' + statusMsg;
+}
+
+function clearLocPin() {
+  document.getElementById('f-lat').value = '';
+  document.getElementById('f-lng').value = '';
+  document.getElementById('loc-coords').style.display = 'none';
+}
+
+function initOrUpdateMap(lat, lng) {
+  const wrap = document.getElementById('location-map-wrap');
+  wrap.classList.add('visible');
+
+  if (!locMap) {
+    locMap = L.map('location-map', { zoomControl: true, attributionControl: false });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19
+    }).addTo(locMap);
+
+    // Custom red pin icon
+    const redIcon = L.divIcon({
+      className: '',
+      html: `<svg width="28" height="38" viewBox="0 0 28 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M14 0C6.27 0 0 6.27 0 14c0 9.33 14 24 14 24S28 23.33 28 14C28 6.27 21.73 0 14 0z" fill="#ad3737"/>
+        <circle cx="14" cy="14" r="6" fill="white"/>
+      </svg>`,
+      iconSize: [28, 38],
+      iconAnchor: [14, 38],
+      popupAnchor: [0, -38]
+    });
+
+    locMarker = L.marker([lat, lng], { icon: redIcon, draggable: true }).addTo(locMap);
+    locMarker.on('dragend', function(e) {
+      const pos = e.target.getLatLng();
+      setLocPin(pos.lat, pos.lng, 'Pin moved — drag to adjust');
+    });
+
+    locMap.on('click', function(e) {
+      locMarker.setLatLng(e.latlng);
+      setLocPin(e.latlng.lat, e.latlng.lng, 'Pin dropped — drag to fine-tune');
+    });
+  } else {
+    locMarker.setLatLng([lat, lng]);
+  }
+
+  locMap.setView([lat, lng], 17);
+  // Force Leaflet to recalculate size after display:block
+  setTimeout(() => locMap.invalidateSize(), 50);
+}
+
+document.getElementById('btn-detect-loc').addEventListener('click', function() {
+  const statusEl = document.getElementById('loc-status');
+  const btn = this;
+  btn.disabled = true;
+  statusEl.className = 'loc-status';
+  statusEl.innerHTML = '⏳ Detecting your location…';
+
+  if (!navigator.geolocation) {
+    statusEl.className = 'loc-status error';
+    statusEl.innerHTML = '✕ GPS not supported on this device. Use "Pick on map" instead.';
+    btn.disabled = false;
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      btn.classList.add('active');
+      document.getElementById('btn-pick-map').classList.remove('active');
+      setLocPin(lat, lng, 'Location detected — drag the pin to fine-tune');
+      initOrUpdateMap(lat, lng);
+      btn.disabled = false;
+    },
+    function(err) {
+      statusEl.className = 'loc-status error';
+      if (err.code === 1) {
+        statusEl.innerHTML = '✕ Location permission denied. Use "Pick on map" instead.';
+      } else {
+        statusEl.innerHTML = '✕ Could not detect location. Use "Pick on map" instead.';
+      }
+      btn.disabled = false;
+    },
+    { enableHighAccuracy: true, timeout: 12000 }
+  );
+});
+
+document.getElementById('btn-pick-map').addEventListener('click', function() {
+  this.classList.add('active');
+  document.getElementById('btn-detect-loc').classList.remove('active');
+
+  const statusEl = document.getElementById('loc-status');
+  statusEl.className = 'loc-status';
+  statusEl.innerHTML = '👆 Tap anywhere on the map to drop your pin, or drag the pin to adjust';
+
+  // Use current pin position if set, else default to Kochi center
+  const existingLat = parseFloat(document.getElementById('f-lat').value) || KOCHI_LATLNG[0];
+  const existingLng = parseFloat(document.getElementById('f-lng').value) || KOCHI_LATLNG[1];
+  initOrUpdateMap(existingLat, existingLng);
+
+  if (!document.getElementById('f-lat').value) {
+    // Don't set pin yet — let user tap/drag
+    clearLocPin();
+  }
+});
 
 // ── PROMO CODE ──────────────────────────────────────────────────────────
 const PROMO_VALIDATE_WEBHOOK = 'https://hook.eu1.make.com/txhcyl3qpcmi0xdvrrcoob2fsbhy6sn8';
