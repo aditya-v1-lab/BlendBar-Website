@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leave a Review — Blendbar Nutrition</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red: #ad3737;
+      --red-dark: #8a2020;
+      --red-light: #fdf0f0;
+      --red-border: #f5d5d5;
+      --cream: #FAF6F0;
+      --text: #111111;
+      --muted: #777777;
+      --light: #999999;
+    }
+
+    body {
+      background-color: var(--cream);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 16px 80px;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 8px 48px rgba(173,55,55,0.10);
+      width: 100%;
+      max-width: 520px;
+      overflow: hidden;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background-color: var(--red);
+      padding: 48px 40px 40px;
+      text-align: center;
+    }
+    .hero-logo {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 48px;
+      font-style: italic;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 1px;
+      line-height: 1;
+    }
+    .hero-sub {
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.55);
+      letter-spacing: 7px;
+      text-transform: uppercase;
+      margin-top: 5px;
+    }
+    .hero-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .hero-divider-line {
+      width: 48px;
+      height: 1px;
+      background: rgba(255,255,255,0.22);
+    }
+    .hero-divider-dot {
+      color: rgba(255,255,255,0.45);
+      font-size: 8px;
+      letter-spacing: 3px;
+    }
+    .hero-heading {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 28px;
+      font-style: italic;
+      font-weight: 700;
+      color: #fff;
+      margin-top: 24px;
+      line-height: 1.2;
+    }
+    .hero-body {
+      font-size: 13px;
+      color: rgba(255,255,255,0.75);
+      margin-top: 8px;
+      line-height: 1.7;
+    }
+
+    /* ── BODY ── */
+    .body {
+      padding: 36px 40px 40px;
+    }
+
+    /* ── CATEGORY ── */
+    .category {
+      margin-bottom: 28px;
+      animation: fadeUp 0.5s ease both;
+    }
+    .category:nth-child(1) { animation-delay: 0.05s; }
+    .category:nth-child(2) { animation-delay: 0.10s; }
+    .category:nth-child(3) { animation-delay: 0.15s; }
+    .category:nth-child(4) { animation-delay: 0.20s; }
+
+    .category-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--light);
+      margin-bottom: 10px;
+    }
+    .category-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .category-name {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 20px;
+      font-style: italic;
+      font-weight: 700;
+      color: var(--text);
+      min-width: 160px;
+    }
+
+    /* ── STARS ── */
+    .stars {
+      display: flex;
+      gap: 6px;
+    }
+    .star {
+      font-size: 28px;
+      color: #e8ddd0;
+      cursor: pointer;
+      transition: color 0.15s, transform 0.15s;
+      user-select: none;
+      line-height: 1;
+    }
+    .star:hover,
+    .star.active {
+      color: var(--red);
+    }
+    .star:hover {
+      transform: scale(1.15);
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      height: 1px;
+      background: var(--red-border);
+      margin: 4px 0 28px;
+    }
+
+    /* ── TEXTAREA ── */
+    .textarea-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--light);
+      margin-bottom: 10px;
+    }
+    .textarea-heading {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 20px;
+      font-style: italic;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+    textarea {
+      width: 100%;
+      border: 1.5px solid var(--red-border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--red-light);
+      resize: none;
+      outline: none;
+      line-height: 1.6;
+      transition: border-color 0.2s;
+    }
+    textarea:focus {
+      border-color: var(--red);
+    }
+    textarea::placeholder {
+      color: #bbb;
+    }
+
+    /* ── CTA ── */
+    .cta-wrap {
+      margin-top: 32px;
+      text-align: center;
+    }
+    .cta-btn {
+      display: inline-block;
+      background-color: var(--red);
+      color: #fff;
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      padding: 16px 52px;
+      border-radius: 50px;
+      letter-spacing: 0.04em;
+      box-shadow: 0 4px 20px rgba(173,55,55,0.28);
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      width: 100%;
+    }
+    .cta-btn:hover {
+      background: var(--red-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 28px rgba(173,55,55,0.35);
+    }
+    .cta-btn:active {
+      transform: translateY(0);
+    }
+    .cta-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .cta-note {
+      font-size: 12px;
+      color: var(--light);
+      font-style: italic;
+      margin-top: 12px;
+    }
+
+    /* ── SUCCESS STATE ── */
+    .success {
+      display: none;
+      padding: 56px 40px;
+      text-align: center;
+    }
+    .success-icon {
+      font-size: 52px;
+      margin-bottom: 16px;
+    }
+    .success-heading {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 32px;
+      font-style: italic;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+    .success-body {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.75;
+      margin-bottom: 28px;
+    }
+    .success-order-btn {
+      display: inline-block;
+      background-color: var(--red);
+      color: #fff;
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      padding: 14px 36px;
+      border-radius: 50px;
+      letter-spacing: 0.04em;
+      box-shadow: 0 4px 20px rgba(173,55,55,0.28);
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      margin-top: 32px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--light);
+      line-height: 1.8;
+    }
+    .footer a {
+      color: var(--red);
+      text-decoration: none;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 560px) {
+      .hero { padding: 40px 24px 32px; }
+      .body { padding: 28px 24px 32px; }
+      .category-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .category-name { min-width: unset; }
+      .success { padding: 44px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card" id="reviewCard">
+
+    <!-- HERO -->
+    <div class="hero">
+      <p class="hero-logo">blendbar</p>
+      <p class="hero-sub">nutrition</p>
+      <div class="hero-divider">
+        <div class="hero-divider-line"></div>
+        <span class="hero-divider-dot">✦</span>
+        <div class="hero-divider-line"></div>
+      </div>
+      <p class="hero-heading">How were your bowls?</p>
+      <p class="hero-body">Your feedback helps us do better &mdash; and we read every word.</p>
+    </div>
+
+    <!-- FORM -->
+    <div class="body" id="formBody">
+
+      <!-- Delivery -->
+      <div class="category">
+        <p class="category-label">Rate your experience</p>
+        <div class="category-row">
+          <p class="category-name">Delivery</p>
+          <div class="stars" data-category="delivery">
+            <span class="star" data-val="1">★</span>
+            <span class="star" data-val="2">★</span>
+            <span class="star" data-val="3">★</span>
+            <span class="star" data-val="4">★</span>
+            <span class="star" data-val="5">★</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Flavour -->
+      <div class="category">
+        <div class="category-row">
+          <p class="category-name">Flavour</p>
+          <div class="stars" data-category="flavour">
+            <span class="star" data-val="1">★</span>
+            <span class="star" data-val="2">★</span>
+            <span class="star" data-val="3">★</span>
+            <span class="star" data-val="4">★</span>
+            <span class="star" data-val="5">★</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Hunger Satisfaction -->
+      <div class="category">
+        <div class="category-row">
+          <p class="category-name">Hunger Satisfaction</p>
+          <div class="stars" data-category="hunger">
+            <span class="star" data-val="1">★</span>
+            <span class="star" data-val="2">★</span>
+            <span class="star" data-val="3">★</span>
+            <span class="star" data-val="4">★</span>
+            <span class="star" data-val="5">★</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Comment -->
+      <div>
+        <p class="textarea-label">Anything else?</p>
+        <p class="textarea-heading">Leave a comment</p>
+        <textarea id="comment" rows="4" placeholder="Tell us what you loved, or what we can do better..."></textarea>
+      </div>
+
+      <!-- CTA -->
+      <div class="cta-wrap">
+        <button class="cta-btn" id="submitBtn" onclick="submitReview()">Submit Review ★</button>
+        <p class="cta-note">Takes less than a minute &mdash; thank you!</p>
+      </div>
+
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="success" id="successState">
+      <div class="success-icon">🍓</div>
+      <p class="success-heading">Thank you so much!</p>
+      <p class="success-body">Your review means the world to us. We&rsquo;ll use your feedback to keep making Blendbar better with every bowl.</p>
+      <a href="https://blendbarnutrition.in/pack.html" class="success-order-btn">Order Again →</a>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <a href="https://wa.me/917356433564">WhatsApp</a>
+    &nbsp;&middot;&nbsp;
+    <a href="https://www.instagram.com/blendbar_nutrition/">Instagram</a><br><br>
+    © 2025 Blendbar Nutrition &middot; Kochi, Kerala
+  </div>
+
+  <script>
+    const ratings = { delivery: 0, flavour: 0, hunger: 0 };
+
+    document.querySelectorAll('.stars').forEach(group => {
+      const category = group.dataset.category;
+      const stars = group.querySelectorAll('.star');
+
+      stars.forEach(star => {
+        star.addEventListener('mouseover', () => {
+          const val = +star.dataset.val;
+          stars.forEach(s => s.classList.toggle('active', +s.dataset.val <= val));
+        });
+
+        star.addEventListener('mouseout', () => {
+          stars.forEach(s => s.classList.toggle('active', +s.dataset.val <= ratings[category]));
+        });
+
+        star.addEventListener('click', () => {
+          ratings[category] = +star.dataset.val;
+          stars.forEach(s => s.classList.toggle('active', +s.dataset.val <= ratings[category]));
+        });
+      });
+    });
+
+    function submitReview() {
+      const allRated = Object.values(ratings).every(r => r > 0);
+      if (!allRated) {
+        alert('Please rate all four categories before submitting.');
+        return;
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const orderId = params.get('order') || '';
+      const customerName = params.get('name') || '';
+      const customerPhone = params.get('phone') || '';
+
+      // Log to console (replace with your webhook/sheet write later)
+      console.log('Review submitted:', { orderId, customerName, customerPhone, ...ratings, comment: document.getElementById('comment').value });
+
+      // Show success
+      document.getElementById('formBody').style.display = 'none';
+      document.getElementById('successState').style.display = 'block';
+    }
+  </script>
+
+</body>
+</html>
