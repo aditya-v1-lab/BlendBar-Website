@@ -523,15 +523,12 @@
       <!-- Location Pin -->
       <div class="form-row single location-section">
         <div class="field">
-          <label>Drop Pin <span style="font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0;">(optional — helps our driver find you)</span></label>
+          <label>Drop Pin *</label>
+          <p style="font-size:0.78rem;color:var(--mid);margin-bottom:10px;margin-top:-2px;font-style:italic;">So our delivery partners can locate you easily — please pin your exact doorstep or building entrance.</p>
           <div class="location-btns">
-            <button type="button" class="btn-loc" id="btn-detect-loc">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
-              Detect my location
-            </button>
-            <button type="button" class="btn-loc" id="btn-pick-map">
+            <button type="button" class="btn-loc" id="btn-pin-location">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              Pick on map
+              <span id="btn-pin-label">Pin my location</span>
             </button>
           </div>
           <div class="loc-status" id="loc-status"></div>
@@ -540,6 +537,7 @@
             Pinned: <span id="loc-lat-display">—</span>, <span id="loc-lng-display">—</span>
             · <a id="loc-gmaps-link" href="#" target="_blank" style="color:var(--red);text-decoration:none;font-weight:500;">Open in Maps ↗</a>
           </div>
+          <div id="err-loc" class="field-err" style="display:none;">Please drop a pin so our delivery partner can find you</div>
           <input type="hidden" id="f-lat">
           <input type="hidden" id="f-lng">
         </div>
@@ -865,9 +863,20 @@ function validateStep2() {
     errDate.style.display = 'none';
   }
 
+  // Validate location pin (required)
+  const locLat = document.getElementById('f-lat').value;
+  const errLoc = document.getElementById('err-loc');
+  if (!locLat) {
+    errLoc.style.display = 'block';
+    valid = false;
+  } else {
+    errLoc.style.display = 'none';
+  }
+
   if (!valid) {
     const firstErr = document.querySelector('#panel-2 .field input.error, #panel-2 .pack-cal-trigger.error');
     if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    else if (!locLat) document.getElementById('err-loc').scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
   return valid;
 }
@@ -1064,6 +1073,10 @@ function setLocPin(lat, lng, statusMsg) {
   document.getElementById('loc-gmaps-link').href = mapsUrl;
   document.getElementById('loc-coords').style.display = 'block';
 
+  // Clear pin required error
+  const errLoc = document.getElementById('err-loc');
+  if (errLoc) errLoc.style.display = 'none';
+
   const statusEl = document.getElementById('loc-status');
   statusEl.className = 'loc-status success';
   statusEl.innerHTML = '✓ ' + statusMsg;
@@ -1081,8 +1094,9 @@ function initOrUpdateMap(lat, lng) {
 
   if (!locMap) {
     locMap = L.map('location-map', { zoomControl: true, attributionControl: false });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19,
+      subdomains: 'abcd'
     }).addTo(locMap);
 
     // Custom red pin icon
@@ -1116,17 +1130,30 @@ function initOrUpdateMap(lat, lng) {
   setTimeout(() => locMap.invalidateSize(), 50);
 }
 
-document.getElementById('btn-detect-loc').addEventListener('click', function() {
+document.getElementById('btn-pin-location').addEventListener('click', function() {
   const statusEl = document.getElementById('loc-status');
   const btn = this;
+  const btnLabel = document.getElementById('btn-pin-label');
+
   btn.disabled = true;
+  btnLabel.textContent = 'Detecting…';
   statusEl.className = 'loc-status';
   statusEl.innerHTML = '⏳ Detecting your location…';
 
-  if (!navigator.geolocation) {
-    statusEl.className = 'loc-status error';
-    statusEl.innerHTML = '✕ GPS not supported on this device. Use "Pick on map" instead.';
+  function openMapFallback() {
     btn.disabled = false;
+    btn.classList.add('active');
+    btnLabel.textContent = 'Pin my location';
+    const existingLat = parseFloat(document.getElementById('f-lat').value) || KOCHI_LATLNG[0];
+    const existingLng = parseFloat(document.getElementById('f-lng').value) || KOCHI_LATLNG[1];
+    initOrUpdateMap(existingLat, existingLng);
+    if (!document.getElementById('f-lat').value) clearLocPin();
+    statusEl.className = 'loc-status';
+    statusEl.innerHTML = '👆 Tap anywhere on the map to drop your pin, or drag to adjust';
+  }
+
+  if (!navigator.geolocation) {
+    openMapFallback();
     return;
   }
 
@@ -1134,42 +1161,17 @@ document.getElementById('btn-detect-loc').addEventListener('click', function() {
     function(pos) {
       const lat = pos.coords.latitude;
       const lng = pos.coords.longitude;
+      btn.disabled = false;
       btn.classList.add('active');
-      document.getElementById('btn-pick-map').classList.remove('active');
+      btnLabel.textContent = 'Pin my location';
       setLocPin(lat, lng, 'Location detected — drag the pin to fine-tune');
       initOrUpdateMap(lat, lng);
-      btn.disabled = false;
     },
-    function(err) {
-      statusEl.className = 'loc-status error';
-      if (err.code === 1) {
-        statusEl.innerHTML = '✕ Location permission denied. Use "Pick on map" instead.';
-      } else {
-        statusEl.innerHTML = '✕ Could not detect location. Use "Pick on map" instead.';
-      }
-      btn.disabled = false;
+    function() {
+      openMapFallback();
     },
     { enableHighAccuracy: true, timeout: 12000 }
   );
-});
-
-document.getElementById('btn-pick-map').addEventListener('click', function() {
-  this.classList.add('active');
-  document.getElementById('btn-detect-loc').classList.remove('active');
-
-  const statusEl = document.getElementById('loc-status');
-  statusEl.className = 'loc-status';
-  statusEl.innerHTML = '👆 Tap anywhere on the map to drop your pin, or drag the pin to adjust';
-
-  // Use current pin position if set, else default to Kochi center
-  const existingLat = parseFloat(document.getElementById('f-lat').value) || KOCHI_LATLNG[0];
-  const existingLng = parseFloat(document.getElementById('f-lng').value) || KOCHI_LATLNG[1];
-  initOrUpdateMap(existingLat, existingLng);
-
-  if (!document.getElementById('f-lat').value) {
-    // Don't set pin yet — let user tap/drag
-    clearLocPin();
-  }
 });
 
 // ── PROMO CODE ──────────────────────────────────────────────────────────
