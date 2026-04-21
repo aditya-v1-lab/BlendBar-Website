@@ -959,7 +959,12 @@ async function startPayment() {
   const lng = document.getElementById('f-lng').value;
   const mapsLink = (lat && lng) ? `https://maps.google.com/?q=${lat},${lng}` : '';
 
-  // Meta Pixel: user has filled details and committed to pay — fire IC with Advanced Matching data
+  // Meta Pixel: re-init with Advanced Matching data before firing IC
+  fbq('init', '1555365275749866', {
+    em: email,
+    ph: phone,
+    fn: name
+  });
   fbq('track', 'InitiateCheckout', {
     content_name: pack.label,
     content_category: 'pack',
@@ -967,10 +972,6 @@ async function startPayment() {
     value: finalPrice,
     currency: 'INR',
     num_items: packSize
-  }, {
-    em: email,
-    ph: phone,
-    fn: name
   });
 
   // Show loading overlay
@@ -1063,7 +1064,12 @@ async function startPayment() {
       document.getElementById('ty-name').textContent = name;
       document.getElementById('ty-date').textContent = document.getElementById('confirm-date').textContent;
       document.getElementById('ty-payment-id').textContent = response.razorpay_payment_id;
-      // Meta Pixel: successful purchase
+      // Meta Pixel: re-init with Advanced Matching data, then fire Purchase
+      fbq('init', '1555365275749866', {
+        em: email,
+        ph: phone,
+        fn: name
+      });
       fbq('track', 'Purchase', {
         content_name: pack.label,
         content_category: 'pack',
@@ -1071,10 +1077,6 @@ async function startPayment() {
         value: finalPrice,
         currency: 'INR',
         num_items: packSize
-      }, {
-        em: email,
-        ph: phone,
-        fn: name
       });
       // GA4: purchase
       gtag('event', 'purchase', {
