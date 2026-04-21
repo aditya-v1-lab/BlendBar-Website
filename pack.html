@@ -21,6 +21,17 @@
   src="https://www.facebook.com/tr?id=1555365275749866&ev=PageView&noscript=1"
   /></noscript>
   <!-- End Meta Pixel -->
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-GN3MN1Z1Q3"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-GN3MN1Z1Q3');
+  </script>
+  <!-- End Google tag -->
+
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -925,6 +936,17 @@ function goToStep3() {
     value: finalPrice,
     currency: 'INR'
   });
+  // GA4: begin_checkout
+  gtag('event', 'begin_checkout', {
+    currency: 'INR',
+    value: finalPrice,
+    items: [{
+      item_id: 'pack_' + packSize,
+      item_name: PACKS[packSize].label,
+      price: finalPrice,
+      quantity: 1
+    }]
+  });
   goToStep(3);
 }
 
@@ -1038,6 +1060,18 @@ async function startPayment() {
         content_name: pack.label,
         value: finalPrice,
         currency: 'INR'
+      });
+      // GA4: purchase
+      gtag('event', 'purchase', {
+        transaction_id: response.razorpay_payment_id,
+        currency: 'INR',
+        value: finalPrice,
+        items: [{
+          item_id: 'pack_' + packSize,
+          item_name: pack.label,
+          price: finalPrice,
+          quantity: 1
+        }]
       });
       goToStep(4);
     },
