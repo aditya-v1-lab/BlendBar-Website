@@ -1800,7 +1800,12 @@ src="https://www.facebook.com/tr?id=1555365275749866&ev=PageView&noscript=1"/></
       }]
     });
 
-    // Meta Pixel: user has filled details and committed to pay — fire IC with Advanced Matching data
+    // Meta Pixel: re-init with Advanced Matching data before firing IC
+    fbq('init', '1555365275749866', {
+      em: data.email,
+      ph: data.phone,
+      fn: data.name
+    });
     fbq('track', 'InitiateCheckout', {
       content_name: data.plan,
       content_category: 'subscription',
@@ -1808,10 +1813,6 @@ src="https://www.facebook.com/tr?id=1555365275749866&ev=PageView&noscript=1"/></
       value: data.price,
       currency: 'INR',
       num_items: 1
-    }, {
-      em: data.email,
-      ph: data.phone,
-      fn: data.name
     });
 
     const btn = document.querySelector('.btn-submit');
@@ -1892,7 +1893,12 @@ src="https://www.facebook.com/tr?id=1555365275749866&ev=PageView&noscript=1"/></
         } catch(e) {
           console.warn('Capture webhook failed:', e);
         }
-        // Meta Pixel: successful subscription purchase
+        // Meta Pixel: re-init with Advanced Matching data, then fire Purchase
+        fbq('init', '1555365275749866', {
+          em: data.email,
+          ph: data.phone,
+          fn: data.name
+        });
         fbq('track', 'Purchase', {
           content_name: data.plan,
           content_category: 'subscription',
@@ -1900,10 +1906,6 @@ src="https://www.facebook.com/tr?id=1555365275749866&ev=PageView&noscript=1"/></
           value: data.price,
           currency: 'INR',
           num_items: 1
-        }, {
-          em: data.email,
-          ph: data.phone,
-          fn: data.name
         });
         // GA4: purchase
         gtag('event', 'purchase', {
