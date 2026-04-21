@@ -1800,6 +1800,20 @@ src="https://www.facebook.com/tr?id=1555365275749866&ev=PageView&noscript=1"/></
       }]
     });
 
+    // Meta Pixel: user has filled details and committed to pay — fire IC with Advanced Matching data
+    fbq('track', 'InitiateCheckout', {
+      content_name: data.plan,
+      content_category: 'subscription',
+      content_ids: [data.planKey],
+      value: data.price,
+      currency: 'INR',
+      num_items: 1
+    }, {
+      em: data.email,
+      ph: data.phone,
+      fn: data.name
+    });
+
     const btn = document.querySelector('.btn-submit');
     const resetBtn = () => {
       btn.disabled = false;
@@ -1878,6 +1892,19 @@ src="https://www.facebook.com/tr?id=1555365275749866&ev=PageView&noscript=1"/></
         } catch(e) {
           console.warn('Capture webhook failed:', e);
         }
+        // Meta Pixel: successful subscription purchase
+        fbq('track', 'Purchase', {
+          content_name: data.plan,
+          content_category: 'subscription',
+          content_ids: [data.planKey],
+          value: data.price,
+          currency: 'INR',
+          num_items: 1
+        }, {
+          em: data.email,
+          ph: data.phone,
+          fn: data.name
+        });
         // GA4: purchase
         gtag('event', 'purchase', {
           transaction_id: resp.razorpay_payment_id,
