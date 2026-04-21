@@ -836,12 +836,6 @@ function goToStep2() {
   document.getElementById('step2-price').textContent = '₹' + PACKS[packSize].price;
   // Initialize the custom calendar
   initPackCalendar();
-  // Meta Pixel: user selected a pack and is moving to details
-  fbq('track', 'InitiateCheckout', {
-    content_name: PACKS[packSize].label,
-    value: PACKS[packSize].price,
-    currency: 'INR'
-  });
   goToStep(2);
 }
 
@@ -965,6 +959,20 @@ async function startPayment() {
   const lng = document.getElementById('f-lng').value;
   const mapsLink = (lat && lng) ? `https://maps.google.com/?q=${lat},${lng}` : '';
 
+  // Meta Pixel: user has filled details and committed to pay — fire IC with Advanced Matching data
+  fbq('track', 'InitiateCheckout', {
+    content_name: pack.label,
+    content_category: 'pack',
+    content_ids: ['pack_' + packSize],
+    value: finalPrice,
+    currency: 'INR',
+    num_items: packSize
+  }, {
+    em: email,
+    ph: phone,
+    fn: name
+  });
+
   // Show loading overlay
   const payBtn = document.querySelector('#panel-3 .btn-pay');
   const originalText = payBtn.innerHTML;
@@ -1058,8 +1066,15 @@ async function startPayment() {
       // Meta Pixel: successful purchase
       fbq('track', 'Purchase', {
         content_name: pack.label,
+        content_category: 'pack',
+        content_ids: ['pack_' + packSize],
         value: finalPrice,
-        currency: 'INR'
+        currency: 'INR',
+        num_items: packSize
+      }, {
+        em: email,
+        ph: phone,
+        fn: name
       });
       // GA4: purchase
       gtag('event', 'purchase', {
