@@ -1617,7 +1617,7 @@ src="https://www.facebook.com/tr?id=1555365275749866&ev=PageView&noscript=1"/></
 
       if (data.valid) {
         promoCode = code;
-        promoDiscount = parseInt(data.discount_amount) || 200;
+        promoDiscount = data.discount_amount || 200;
         const finalPrice = parseInt(selectedPlanEl.dataset.price) - promoDiscount;
 
         feedback.className = 'promo-feedback success';
@@ -1788,6 +1788,18 @@ src="https://www.facebook.com/tr?id=1555365275749866&ev=PageView&noscript=1"/></
     const data = collectFormData();
     if (!data) return;
 
+    // GA4: begin_checkout
+    gtag('event', 'begin_checkout', {
+      currency: 'INR',
+      value: data.price,
+      items: [{
+        item_id: data.planKey,
+        item_name: data.plan,
+        price: data.price,
+        quantity: 1
+      }]
+    });
+
     const btn = document.querySelector('.btn-submit');
     const resetBtn = () => {
       btn.disabled = false;
@@ -1866,6 +1878,18 @@ src="https://www.facebook.com/tr?id=1555365275749866&ev=PageView&noscript=1"/></
         } catch(e) {
           console.warn('Capture webhook failed:', e);
         }
+        // GA4: purchase
+        gtag('event', 'purchase', {
+          transaction_id: resp.razorpay_payment_id,
+          currency: 'INR',
+          value: data.price,
+          items: [{
+            item_id: data.planKey,
+            item_name: data.plan,
+            price: data.price,
+            quantity: 1
+          }]
+        });
         showSuccess();
       },
       modal: { ondismiss: resetBtn }
