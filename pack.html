@@ -207,6 +207,29 @@
     @keyframes barFull { 0%, 100% { box-shadow: 0 0 0 0 rgba(173,55,55,0.4); } 50% { box-shadow: 0 0 0 4px rgba(173,55,55,0); } }
     .progress-bar.full { animation: barFull 0.8s ease; }
 
+    /* STICKY BOTTOM BAR */
+    .sticky-pay-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 190;
+      background: rgba(250,246,240,0.97); backdrop-filter: blur(16px);
+      border-top: 1px solid var(--red-blush);
+      box-shadow: 0 -4px 20px rgba(173,55,55,0.08);
+      padding: 12px 20px; padding-bottom: max(12px, env(safe-area-inset-bottom));
+      transform: translateY(100%); opacity: 0;
+      transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), opacity 0.35s ease;
+    }
+    .sticky-pay-bar.visible { transform: translateY(0); opacity: 1; }
+    .sticky-pay-inner {
+      max-width: 700px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between; gap: 14px;
+    }
+    .sticky-pay-info { display: flex; align-items: baseline; gap: 8px; }
+    .sticky-pay-plan { font-size: 0.82rem; font-weight: 500; color: var(--mid); }
+    .sticky-pay-price { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 700; color: var(--red); }
+    .sticky-pay-btn {
+      width: auto; min-width: 120px; padding: 12px 28px;
+      font-size: 0.9rem; max-width: none; box-shadow: 0 4px 16px rgba(173,55,55,0.3);
+    }
+
     /* ── PACK CALENDAR ── */
     .pack-cal-trigger {
       display: flex;
@@ -545,49 +568,6 @@
   🕔 &nbsp;Next weekday delivery · 4–6 PM · WhatsApp ping when we're on the way
 </div>
 
-<!-- TRUST STRIP -->
-<div class="trust-strip">
-  <div class="trust-inner">
-    <div class="trust-stats reveal">
-      <div class="trust-stat">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
-        <span>Handmade fresh in <strong>Kochi</strong></span>
-      </div>
-      <div class="trust-stat">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        <span><strong>500+</strong> bowls delivered</span>
-      </div>
-      <div class="trust-stat">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        <span><strong>4.9★</strong> from customers</span>
-      </div>
-    </div>
-    <div class="trust-reviews reveal reveal-delay-1">
-      <div class="trust-review">
-        <div class="trust-review-stars">★★★★★</div>
-        <div class="trust-review-text">"Best yogurt bowls in Kochi. The mango one is insane — thick, creamy, and actually filling."</div>
-        <div class="trust-review-author">— Anjali R., Kakkanad</div>
-      </div>
-      <div class="trust-review">
-        <div class="trust-review-stars">★★★★★</div>
-        <div class="trust-review-text">"Ordered on day 1 and got it the next day within the delivery time. Packaging is top notch and premium."</div>
-        <div class="trust-review-author">— Rahul M., Edappally</div>
-      </div>
-      <div class="trust-review">
-        <div class="trust-review-stars">★★★★★</div>
-        <div class="trust-review-text">"My kids love the strawberry bowl. We've ordered 3 times now. WhatsApp updates are a nice touch."</div>
-        <div class="trust-review-author">— Priya S., Kalamassery</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- HERO BANNER -->
-<div class="hero-banner">
-  <img src="bowl-hero.png" alt="Blendbar yogurt bowls — Guava, Strawberry, and Mango" class="reveal reveal-delay-2">
-  <p class="reveal reveal-delay-3">Thick Greek-style yogurt · fresh fruit · crunchy granola · ~250g per bowl</p>
-</div>
-
 <!-- STEP INDICATORS -->
 <div class="steps-wrap">
   <div class="steps-bar">
@@ -610,18 +590,62 @@
 
   <!-- ── STEP 1: PLAN ── -->
   <div class="step-panel active" id="panel-1">
-    <div class="section-heading" style="margin-top:12px;">
+
+    <!-- TRUST STRIP (plan step only) -->
+    <div class="trust-strip" style="margin:-32px -20px 0;border-radius:0;">
+      <div class="trust-inner">
+        <div class="trust-stats reveal">
+          <div class="trust-stat">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span>Handmade fresh in <strong>Kochi</strong></span>
+          </div>
+          <div class="trust-stat">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span><strong>500+</strong> bowls delivered</span>
+          </div>
+          <div class="trust-stat">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <span><strong>4.9★</strong> from customers</span>
+          </div>
+        </div>
+        <div class="trust-reviews reveal reveal-delay-1">
+          <div class="trust-review">
+            <div class="trust-review-stars">★★★★★</div>
+            <div class="trust-review-text">"Best yogurt bowls in Kochi. The mango one is insane — thick, creamy, and actually filling."</div>
+            <div class="trust-review-author">— Anjali R., Kakkanad</div>
+          </div>
+          <div class="trust-review">
+            <div class="trust-review-stars">★★★★★</div>
+            <div class="trust-review-text">"Ordered on day 1 and got it the next day within the delivery time. Packaging is top notch and premium."</div>
+            <div class="trust-review-author">— Rahul M., Edappally</div>
+          </div>
+          <div class="trust-review">
+            <div class="trust-review-stars">★★★★★</div>
+            <div class="trust-review-text">"My kids love the strawberry bowl. We've ordered 3 times now. WhatsApp updates are a nice touch."</div>
+            <div class="trust-review-author">— Priya S., Kalamassery</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HERO BANNER (plan step only) -->
+    <div class="hero-banner" style="margin:0 -20px;padding-top:20px;">
+      <img src="bowl-hero.png" alt="Blendbar yogurt bowls — Guava, Strawberry, and Mango" class="reveal reveal-delay-2">
+      <p class="reveal reveal-delay-3">Thick Greek-style yogurt · fresh fruit · crunchy granola · ~250g per bowl</p>
+    </div>
+
+    <div class="section-heading" style="margin-top:28px;">
       <div class="section-label">One-time order</div>
       <h2>Pick your <em>bowls.</em></h2>
     </div>
 
     <div class="pack-toggle">
-      <button class="pack-btn active" data-pack="2" onclick="selectPack(2)">
+      <button class="pack-btn" data-pack="2" onclick="selectPack(2)">
         <div class="pack-name">Pack of 2</div>
         <div class="pack-price">₹399</div>
         <div class="pack-per">₹199 per bowl</div>
       </button>
-      <button class="pack-btn featured" data-pack="3" onclick="selectPack(3)">
+      <button class="pack-btn featured active" data-pack="3" onclick="selectPack(3)">
         <div class="pack-badge">Best value</div>
         <div class="pack-name">Pack of 3</div>
         <div class="pack-price">₹549</div>
@@ -665,7 +689,7 @@
     <div class="confirm-plan-bar" id="step2-plan-bar">
       <div>
         <div class="cpb-label">Your order</div>
-        <div class="cpb-value" id="step2-plan-name">Pack of 2</div>
+        <div class="cpb-value" id="step2-plan-name">Pack of 3</div>
       </div>
       <div>
         <div class="cpb-label">Flavours</div>
@@ -673,7 +697,7 @@
       </div>
       <div style="text-align:right;">
         <div class="cpb-label">Total</div>
-        <div class="cpb-price" id="step2-price">₹399</div>
+        <div class="cpb-price" id="step2-price">₹549</div>
       </div>
       <button class="btn-change" onclick="goToStep(1)">Change</button>
     </div>
@@ -721,11 +745,12 @@
         <div class="field">
           <label>Delivery Date *</label>
           <input type="hidden" id="f-date">
-          <div class="pack-cal-trigger" id="pack-cal-trigger">
-            <span id="pack-cal-display">Select a delivery date</span>
+          <div style="display:flex;align-items:center;gap:10px;padding:11px 0;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ad3737" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span id="pack-cal-display" style="font-size:0.92rem;font-weight:600;color:var(--dark);"></span>
+            <a href="#" id="pack-cal-change-link" onclick="event.preventDefault();document.getElementById('pack-cal-popover').style.display=document.getElementById('pack-cal-popover').style.display==='none'?'block':'none';" style="font-size:0.78rem;color:var(--red);text-decoration:none;font-weight:500;margin-left:auto;">Change</a>
           </div>
-          <div class="pack-cal-popover" id="pack-cal-popover">
+          <div class="pack-cal-popover" id="pack-cal-popover" style="display:none;">
             <div class="pack-cal-nav">
               <button type="button" id="pack-cal-prev">&#8249;</button>
               <span class="pack-cal-month-label" id="pack-cal-month-label"></span>
@@ -737,6 +762,8 @@
             <div class="pack-cal-grid" id="pack-cal-grid"></div>
             <div class="pack-cal-note">&#10022; We deliver Monday–Friday only. Weekends are excluded.</div>
           </div>
+          <!-- Hidden trigger for calendar JS compatibility -->
+          <div id="pack-cal-trigger" style="display:none;" class="has-value"></div>
           <div class="field-err" id="err-f-date" style="display:none;">Please select a delivery date</div>
         </div>
       </div>
@@ -776,7 +803,11 @@
       </div>
     </div>
 
-    <!-- Promo Code -->
+    <!-- Promo Code (collapsed) -->
+    <div style="text-align:center;margin-bottom:20px;">
+      <a href="#" id="promo-toggle-link" onclick="event.preventDefault();var w=document.getElementById('promo-card-wrap');w.style.display=w.style.display==='none'?'block':'none';this.style.display='none';" style="font-size:0.82rem;color:var(--red);text-decoration:none;font-weight:500;">Have a promo code?</a>
+    </div>
+    <div id="promo-card-wrap" style="display:none;">
     <div class="form-card">
       <div class="form-card-title">Promo Code <span style="font-family:'Outfit',sans-serif;font-size:0.75rem;font-weight:400;color:var(--muted);margin-left:6px;">Optional</span></div>
       <div class="promo-row">
@@ -792,10 +823,11 @@
         <span id="promo-savings-text"></span>
       </div>
     </div>
+    </div>
 
     <div class="cta-area">
       <button class="btn-secondary" onclick="goToStep(1)">← Back</button>
-      <button class="btn-pay" style="width:auto;" onclick="startPaymentDirect()">Pay ₹<span id="step2-pay-amount">399</span> →</button>
+      <button class="btn-pay" style="width:auto;" onclick="startPaymentDirect()">Pay ₹<span id="step2-pay-amount">549</span> →</button>
       <div class="cta-note">Secure payment via Razorpay · We'll confirm via WhatsApp</div>
     </div>
   </div>
@@ -910,6 +942,17 @@
   </div>
 
 </main>
+
+<!-- STICKY BOTTOM BAR (step 2 only) -->
+<div class="sticky-pay-bar" id="sticky-pay-bar" style="display:none;">
+  <div class="sticky-pay-inner">
+    <div class="sticky-pay-info">
+      <span class="sticky-pay-plan" id="sticky-plan">Pack of 3</span>
+      <span class="sticky-pay-price" id="sticky-price">₹549</span>
+    </div>
+    <button class="btn-pay sticky-pay-btn" onclick="startPaymentDirect()">Pay →</button>
+  </div>
+</div>
 
 <script>
 const FLAVOURS = [
@@ -1035,6 +1078,20 @@ function goToStep(n) {
   currentStep = n;
   // Hide step indicators on thank-you screen
   document.querySelector('.steps-wrap').style.display = n === 4 ? 'none' : '';
+  // Show trust strip + hero only on step 1
+  document.querySelector('.trust-strip').style.display = n === 1 ? '' : 'none';
+  document.querySelector('.hero-banner').style.display = n === 1 ? '' : 'none';
+  // Sticky bar on step 2 only
+  const stickyBar = document.getElementById('sticky-pay-bar');
+  if (n === 2) {
+    stickyBar.style.display = '';
+    requestAnimationFrame(() => requestAnimationFrame(() => stickyBar.classList.add('visible')));
+    document.querySelector('main').style.paddingBottom = '100px';
+  } else {
+    stickyBar.classList.remove('visible');
+    setTimeout(() => { stickyBar.style.display = 'none'; }, 350);
+    document.querySelector('main').style.paddingBottom = '';
+  }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -1045,6 +1102,9 @@ function goToStep2() {
   document.getElementById('step2-flavours').textContent = getFlavoursText();
   document.getElementById('step2-price').textContent = '₹' + PACKS[packSize].price;
   document.getElementById('step2-pay-amount').textContent = PACKS[packSize].price;
+  // Sync sticky bar
+  document.getElementById('sticky-plan').textContent = PACKS[packSize].label;
+  document.getElementById('sticky-price').textContent = '₹' + PACKS[packSize].price;
   // Initialize the custom calendar
   initPackCalendar();
   goToStep(2);
@@ -1472,6 +1532,9 @@ async function applyPromoCode() {
       document.getElementById('step2-price').innerHTML =
         '<s style="opacity:.5;font-size:0.85rem;">₹' + PACKS[packSize].price + '</s> ₹' + finalPrice;
       document.getElementById('step2-pay-amount').textContent = finalPrice;
+      // Sync sticky bar
+      document.getElementById('sticky-price').innerHTML =
+        '<s style="opacity:.5;font-size:0.9rem;">₹' + PACKS[packSize].price + '</s> ₹' + finalPrice;
     } else {
       feedback.className = 'promo-feedback error';
       feedback.style.display = 'flex';
@@ -1616,22 +1679,14 @@ function initPackCalendar() {
   const earliest = packGetNextDeliveryDay();
   packCalViewYear  = earliest.getFullYear();
   packCalViewMonth = earliest.getMonth();
-  // Don't auto-select — let customer choose
-  packCalSelectedDate = null;
-  document.getElementById('f-date').value = '';
-  document.getElementById('pack-cal-display').textContent = 'Select a delivery date';
-  document.getElementById('pack-cal-trigger').classList.remove('has-value', 'error');
-  document.getElementById('pack-cal-popover').style.display = 'none';
+
+  // Auto-select next available delivery day
+  const autoDate = packToDateString(earliest);
+  packCalSelectDate(autoDate);
 
   // Attach nav listeners (only once)
-  const trigger = document.getElementById('pack-cal-trigger');
   const prevBtn = document.getElementById('pack-cal-prev');
   const nextBtn = document.getElementById('pack-cal-next');
-
-  // Remove and re-add to avoid duplicate listeners
-  const newTrigger = trigger.cloneNode(true);
-  trigger.parentNode.replaceChild(newTrigger, trigger);
-  newTrigger.addEventListener('click', packToggleCalendar);
 
   const newPrev = prevBtn.cloneNode(true);
   prevBtn.parentNode.replaceChild(newPrev, prevBtn);
@@ -1672,7 +1727,7 @@ document.querySelectorAll('.btn-pay').forEach(btn => {
 });
 
 // Init
-selectPack(2);
+selectPack(3);
 
 // ── Scroll Reveal ──
 window.addEventListener('load', function() {
@@ -1701,7 +1756,7 @@ window.addEventListener('load', function() {
 </script>
 
 <!-- WhatsApp FAB -->
-<a class="wa-fab" href="https://wa.me/917356664464?text=Hi%20Blendbar!%20I%20have%20a%20question%20about%20the%20yogurt%20bowls" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
+<a class="wa-fab" href="https://wa.me/917356433564?text=Hi%20Blendbar!%20I%20have%20a%20question%20about%20the%20yogurt%20bowls" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
   <span class="wa-fab-label">Have a question? Chat with us</span>
   <svg viewBox="0 0 32 32" fill="currentColor"><path d="M16.004 2.667A13.26 13.26 0 0 0 2.667 15.907a13.15 13.15 0 0 0 1.792 6.629L2.667 29.333l7.027-1.838a13.3 13.3 0 0 0 6.31 1.605h.005c7.325 0 13.324-5.953 13.324-13.288a13.21 13.21 0 0 0-3.9-9.395 13.24 13.24 0 0 0-9.43-3.75zm0 24.32a11.04 11.04 0 0 1-5.617-1.537l-.403-.239-4.178 1.094 1.115-4.07-.263-.418a10.92 10.92 0 0 1-1.687-5.81c0-6.091 4.965-11.044 11.066-11.044a10.96 10.96 0 0 1 7.804 3.228 10.95 10.95 0 0 1 3.236 7.816c-.003 6.094-4.968 11.047-11.073 11.047v-.067zm6.068-8.273c-.333-.166-1.97-.971-2.275-1.082-.305-.111-.527-.166-.749.167-.222.333-.86 1.082-1.054 1.304-.194.222-.389.25-.722.083-.333-.166-1.406-.518-2.678-1.652-.99-.882-1.658-1.97-1.853-2.303-.194-.333-.02-.514.146-.68.15-.149.333-.389.5-.583.166-.194.222-.333.333-.555.111-.222.056-.417-.028-.583-.083-.167-.749-1.804-1.026-2.47-.27-.649-.545-.561-.749-.572l-.638-.011a1.22 1.22 0 0 0-.888.417c-.305.333-1.166 1.138-1.166 2.776 0 1.637 1.194 3.22 1.36 3.442.167.222 2.35 3.586 5.695 5.03.796.343 1.417.548 1.901.702.799.253 1.526.218 2.1.132.641-.095 1.971-.806 2.249-1.584.277-.778.277-1.443.194-1.583-.083-.14-.305-.222-.638-.389z"/></svg>
 </a>
