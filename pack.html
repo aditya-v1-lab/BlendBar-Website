@@ -601,7 +601,7 @@
     </div>
     <div class="step-item" id="step-ind-3">
       <div class="step-dot">3</div>
-      <div class="step-label">Confirm</div>
+      <div class="step-label" style="text-transform:none;letter-spacing:0.02em;font-weight:500;font-size:0.6rem;">Your new routine, delivered.</div>
     </div>
   </div>
 </div>
@@ -795,8 +795,8 @@
 
     <div class="cta-area">
       <button class="btn-secondary" onclick="goToStep(1)">← Back</button>
-      <button class="btn-pay" style="width:auto;" onclick="goToStep3()">Review order →</button>
-      <div class="cta-note">We'll confirm via WhatsApp after payment</div>
+      <button class="btn-pay" style="width:auto;" onclick="startPaymentDirect()">Pay ₹<span id="step2-pay-amount">399</span> →</button>
+      <div class="cta-note">Secure payment via Razorpay · We'll confirm via WhatsApp</div>
     </div>
   </div>
 
@@ -1044,6 +1044,7 @@ function goToStep2() {
   document.getElementById('step2-plan-name').textContent = PACKS[packSize].label;
   document.getElementById('step2-flavours').textContent = getFlavoursText();
   document.getElementById('step2-price').textContent = '₹' + PACKS[packSize].price;
+  document.getElementById('step2-pay-amount').textContent = PACKS[packSize].price;
   // Initialize the custom calendar
   initPackCalendar();
   goToStep(2);
@@ -1096,45 +1097,15 @@ function validateStep2() {
   return valid;
 }
 
-function goToStep3() {
+function startPaymentDirect() {
   if (!validateStep2()) return;
-  const name = document.getElementById('f-name').value.trim();
-  const phone = document.getElementById('f-phone').value.trim();
-  const address = document.getElementById('f-address').value.trim();
-  const pin = document.getElementById('f-pincode').value.trim();
-  const dateRaw = document.getElementById('f-date').value;
-  const notes = document.getElementById('f-notes').value.trim();
-
-  const dateFormatted = dateRaw ? new Date(dateRaw + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '—';
 
   const finalPrice = PACKS[packSize].price - promoDiscount;
+  const name = document.getElementById('f-name').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
+  const email = document.getElementById('f-email').value.trim();
 
-  document.getElementById('confirm-pack').textContent = PACKS[packSize].label;
-  document.getElementById('confirm-price').textContent = '₹' + finalPrice;
-  document.getElementById('pay-amount').textContent = finalPrice;
-  document.getElementById('confirm-flavours').textContent = getFlavoursText();
-  document.getElementById('confirm-name').textContent = name;
-  document.getElementById('confirm-phone').textContent = phone;
-  document.getElementById('confirm-address').textContent = address + ', ' + pin;
-  document.getElementById('confirm-pin').textContent = pin;
-  document.getElementById('confirm-date').textContent = dateFormatted;
-
-  const notesRow = document.getElementById('confirm-notes-row');
-  if (notes) { document.getElementById('confirm-notes').textContent = notes; notesRow.style.display = 'flex'; }
-  else { notesRow.style.display = 'none'; }
-
-  const locLat = document.getElementById('f-lat').value;
-  const locLng = document.getElementById('f-lng').value;
-  const locRow = document.getElementById('confirm-location-row');
-  if (locLat && locLng) {
-    const mapsUrl = `https://maps.google.com/?q=${locLat},${locLng}`;
-    document.getElementById('confirm-location').innerHTML = `${parseFloat(locLat).toFixed(5)}, ${parseFloat(locLng).toFixed(5)} &nbsp;<a href="${mapsUrl}" target="_blank" style="color:var(--red);font-size:0.8rem;">View ↗</a>`;
-    locRow.style.display = 'flex';
-  } else {
-    locRow.style.display = 'none';
-  }
-
-  // Meta Pixel: user filled details and is on the confirm/pay screen
+  // Meta Pixel: AddPaymentInfo
   fbq('track', 'AddPaymentInfo', {
     content_name: PACKS[packSize].label,
     value: finalPrice,
@@ -1151,8 +1122,13 @@ function goToStep3() {
       quantity: 1
     }]
   });
-  goToStep(3);
+
+  // Skip review — go straight to payment
+  startPayment();
 }
+
+// Keep goToStep3 as alias in case anything references it
+function goToStep3() { startPaymentDirect(); }
 
 async function startPayment() {
   const pack = PACKS[packSize];
@@ -1185,7 +1161,7 @@ async function startPayment() {
   });
 
   // Show loading overlay
-  const payBtn = document.querySelector('#panel-3 .btn-pay');
+  const payBtn = document.querySelector('#panel-2 .btn-pay');
   const originalText = payBtn.innerHTML;
   payBtn.disabled = true;
   payBtn.innerHTML = 'Creating order…';
@@ -1236,7 +1212,8 @@ async function startPayment() {
     description: `${pack.label}: ${flavoursText}`,
     image: 'https://blendbarnutrition.in/favicon.ico',
     handler: function(response) {
-      const dateFormatted = document.getElementById('confirm-date').textContent;
+      const dateRaw = document.getElementById('f-date').value;
+      const dateFormatted = dateRaw ? new Date(dateRaw + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '—';
       // Fire promo write-back webhook if a promo code was used
       if (promoCode) {
         fetch('https://hook.eu1.make.com/4n6qp2lwvf4i182fvk308v2qhdjtl9ue', {
@@ -1272,7 +1249,7 @@ async function startPayment() {
       document.getElementById('ty-price').textContent = '₹' + finalPrice;
       document.getElementById('ty-flavours').textContent = flavoursText;
       document.getElementById('ty-name').textContent = name;
-      document.getElementById('ty-date').textContent = document.getElementById('confirm-date').textContent;
+      document.getElementById('ty-date').textContent = dateFormatted;
       document.getElementById('ty-payment-id').textContent = response.razorpay_payment_id;
       // Meta Pixel: re-init with Advanced Matching data, then fire Purchase
       fbq('init', '1555365275749866', {
@@ -1494,6 +1471,7 @@ async function applyPromoCode() {
 
       document.getElementById('step2-price').innerHTML =
         '<s style="opacity:.5;font-size:0.85rem;">₹' + PACKS[packSize].price + '</s> ₹' + finalPrice;
+      document.getElementById('step2-pay-amount').textContent = finalPrice;
     } else {
       feedback.className = 'promo-feedback error';
       feedback.style.display = 'flex';
