@@ -363,6 +363,135 @@
     .loc-coords { font-size: 0.72rem; color: var(--muted); margin-top: 4px; }
     .loc-coords span { color: var(--dark); font-weight: 500; }
     .loc-optional-note { font-size: 0.72rem; color: var(--muted); font-style: italic; margin-top: 6px; }
+
+    /* ── TRUST STRIP ── */
+    .trust-strip {
+      background: var(--white);
+      border-bottom: 1px solid var(--red-blush);
+      padding: 18px 20px;
+      overflow: hidden;
+    }
+    .trust-inner {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .trust-stats {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .trust-stat {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--mid);
+    }
+    .trust-stat svg {
+      flex-shrink: 0;
+      color: var(--red);
+    }
+    .trust-stat strong {
+      color: var(--dark);
+      font-weight: 600;
+    }
+    .trust-reviews {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+    .trust-reviews::-webkit-scrollbar { display: none; }
+    .trust-review {
+      flex: 0 0 260px;
+      scroll-snap-align: start;
+      background: var(--cream);
+      border: 1px solid var(--red-blush);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+    .trust-review-stars {
+      color: #e6a817;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .trust-review-text {
+      font-size: 0.82rem;
+      color: var(--dark);
+      line-height: 1.45;
+      font-style: italic;
+      margin-bottom: 6px;
+    }
+    .trust-review-author {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── WHATSAPP FAB ── */
+    .wa-fab {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 300;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #25D366;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 16px rgba(37,211,102,0.4);
+      text-decoration: none;
+      transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s;
+      animation: waFabPulse 3s ease-in-out infinite;
+    }
+    .wa-fab:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 24px rgba(37,211,102,0.5);
+    }
+    .wa-fab svg { width: 28px; height: 28px; }
+    .wa-fab-label {
+      position: absolute;
+      right: 66px;
+      background: var(--white);
+      color: var(--dark);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 500;
+      padding: 8px 14px;
+      border-radius: 10px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+      white-space: nowrap;
+      opacity: 0;
+      transform: translateX(8px);
+      pointer-events: none;
+      transition: opacity 0.25s, transform 0.25s;
+    }
+    .wa-fab:hover .wa-fab-label {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    @keyframes waFabPulse {
+      0%, 100% { box-shadow: 0 4px 16px rgba(37,211,102,0.4); }
+      50% { box-shadow: 0 4px 16px rgba(37,211,102,0.4), 0 0 0 8px rgba(37,211,102,0.12); }
+    }
+    @media (max-width: 500px) {
+      .wa-fab { bottom: 18px; right: 18px; width: 52px; height: 52px; }
+      .wa-fab svg { width: 26px; height: 26px; }
+      .trust-stat { font-size: 0.72rem; }
+      .trust-review { flex: 0 0 230px; }
+    }
   </style>
 </head>
 <body>
@@ -376,6 +505,49 @@
 
 <div class="delivery-strip">
   🕔 &nbsp;Next weekday delivery · 4–6 PM · WhatsApp ping when we're on the way
+</div>
+
+<!-- TRUST STRIP -->
+<div class="trust-strip">
+  <div class="trust-inner">
+    <div class="trust-stats">
+      <div class="trust-stat">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span>Handmade fresh in <strong>Kochi</strong></span>
+      </div>
+      <div class="trust-stat">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span><strong>500+</strong> bowls delivered</span>
+      </div>
+      <div class="trust-stat">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <span><strong>4.9★</strong> from customers</span>
+      </div>
+    </div>
+    <div class="trust-reviews">
+      <div class="trust-review">
+        <div class="trust-review-stars">★★★★★</div>
+        <div class="trust-review-text">"Best yogurt bowls in Kochi. The mango one is insane — thick, creamy, and actually filling."</div>
+        <div class="trust-review-author">— Anjali R., Kakkanad</div>
+      </div>
+      <div class="trust-review">
+        <div class="trust-review-stars">★★★★★</div>
+        <div class="trust-review-text">"Ordered on day 1 and got it the next day within the delivery time. Packaging is top notch and premium."</div>
+        <div class="trust-review-author">— Rahul M., Edappally</div>
+      </div>
+      <div class="trust-review">
+        <div class="trust-review-stars">★★★★★</div>
+        <div class="trust-review-text">"My kids love the strawberry bowl. We've ordered 3 times now. WhatsApp updates are a nice touch."</div>
+        <div class="trust-review-author">— Priya S., Kalamassery</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HERO BANNER -->
+<div style="text-align:center;padding:20px 20px 0;background:var(--cream);">
+  <img src="bowl-hero.png" alt="Blendbar yogurt bowls — Guava, Strawberry, and Mango" style="width:100%;max-width:600px;border-radius:16px;box-shadow:0 8px 32px rgba(173,55,55,0.12);">
+  <p style="font-size:0.85rem;color:var(--mid);margin-top:12px;line-height:1.5;">Thick Greek-style yogurt · fresh fruit · crunchy granola · ~250g per bowl</p>
 </div>
 
 <!-- STEP INDICATORS -->
@@ -1486,6 +1658,12 @@ document.querySelectorAll('.btn-pay').forEach(btn => {
 // Init
 selectPack(2);
 </script>
+
+<!-- WhatsApp FAB -->
+<a class="wa-fab" href="https://wa.me/917356664464?text=Hi%20Blendbar!%20I%20have%20a%20question%20about%20the%20yogurt%20bowls" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
+  <span class="wa-fab-label">Have a question? Chat with us</span>
+  <svg viewBox="0 0 32 32" fill="currentColor"><path d="M16.004 2.667A13.26 13.26 0 0 0 2.667 15.907a13.15 13.15 0 0 0 1.792 6.629L2.667 29.333l7.027-1.838a13.3 13.3 0 0 0 6.31 1.605h.005c7.325 0 13.324-5.953 13.324-13.288a13.21 13.21 0 0 0-3.9-9.395 13.24 13.24 0 0 0-9.43-3.75zm0 24.32a11.04 11.04 0 0 1-5.617-1.537l-.403-.239-4.178 1.094 1.115-4.07-.263-.418a10.92 10.92 0 0 1-1.687-5.81c0-6.091 4.965-11.044 11.066-11.044a10.96 10.96 0 0 1 7.804 3.228 10.95 10.95 0 0 1 3.236 7.816c-.003 6.094-4.968 11.047-11.073 11.047v-.067zm6.068-8.273c-.333-.166-1.97-.971-2.275-1.082-.305-.111-.527-.166-.749.167-.222.333-.86 1.082-1.054 1.304-.194.222-.389.25-.722.083-.333-.166-1.406-.518-2.678-1.652-.99-.882-1.658-1.97-1.853-2.303-.194-.333-.02-.514.146-.68.15-.149.333-.389.5-.583.166-.194.222-.333.333-.555.111-.222.056-.417-.028-.583-.083-.167-.749-1.804-1.026-2.47-.27-.649-.545-.561-.749-.572l-.638-.011a1.22 1.22 0 0 0-.888.417c-.305.333-1.166 1.138-1.166 2.776 0 1.637 1.194 3.22 1.36 3.442.167.222 2.35 3.586 5.695 5.03.796.343 1.417.548 1.901.702.799.253 1.526.218 2.1.132.641-.095 1.971-.806 2.249-1.584.277-.778.277-1.443.194-1.583-.083-.14-.305-.222-.638-.389z"/></svg>
+</a>
 
 </body>
 </html>
