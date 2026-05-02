@@ -680,13 +680,25 @@
     .fb-btn-primary:hover {
       box-shadow: 0 4px 24px rgba(173,55,55,0.45);
     }
+    .fb-btn-primary.fb-bounce {
+      animation: fbBtnBounce 0.5s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes fbBtnBounce {
+      0%   { transform: scale(1); }
+      20%  { transform: scale(0.92); }
+      50%  { transform: scale(1.08); }
+      80%  { transform: scale(0.97); }
+      100% { transform: scale(1); }
+    }
     .fb-btn-secondary {
       background: transparent;
-      color: var(--red);
-      border: 1.5px solid var(--red-blush);
+      color: var(--muted);
+      border: none;
+      font-size: 0.82rem;
+      font-weight: 500;
     }
     .fb-btn-secondary:hover {
-      background: var(--red-pale);
+      color: var(--mid);
     }
     .fb-or {
       font-family: 'Outfit', sans-serif;
@@ -720,8 +732,7 @@
     </div>
     <div class="fb-bottom">
       <a class="fb-btn fb-btn-primary" href="#" id="fbGrabBtn">Grab my first bowl &rarr;</a>
-      <div class="fb-or">or</div>
-      <a class="fb-btn fb-btn-secondary" href="subscribe.html">Subscribe &amp; save from &#8377;190/bowl</a>
+      <a class="fb-btn fb-btn-secondary" href="#" id="fbDismissBtn">No thanks, show me the packs</a>
     </div>
   </div>
 </div>
@@ -730,9 +741,10 @@ document.addEventListener('DOMContentLoaded', function(){
   var overlay = document.getElementById('fbOverlay');
   var closeBtn = document.getElementById('fbClose');
   var grabBtn = document.getElementById('fbGrabBtn');
+  var dismissBtn = document.getElementById('fbDismissBtn');
   var KEY = 'bb_fb_dismissed';
 
-  if (!overlay || !closeBtn || !grabBtn) return;
+  if (!overlay || !closeBtn || !grabBtn || !dismissBtn) return;
 
   function closePopup() {
     overlay.classList.remove('active');
@@ -743,18 +755,29 @@ document.addEventListener('DOMContentLoaded', function(){
   setTimeout(function(){
     try { if (sessionStorage.getItem(KEY)) return; } catch(e) {}
     overlay.classList.add('active');
-  }, 2500);
+  }, 3000);
 
   closeBtn.addEventListener('click', closePopup);
   overlay.addEventListener('click', function(e){
     if (e.target === overlay) closePopup();
   });
 
-  // "Grab my first bowl" launches the first bowl flow
+  // "Grab my first bowl" — bounce then launch first bowl flow
   grabBtn.addEventListener('click', function(e){
     e.preventDefault();
+    grabBtn.classList.add('fb-bounce');
+    setTimeout(function(){
+      closePopup();
+      initFirstBowlFlow();
+    }, 450);
+  });
+
+  // "No thanks" — dismiss and scroll to regular pack flow
+  dismissBtn.addEventListener('click', function(e){
+    e.preventDefault();
     closePopup();
-    initFirstBowlFlow();
+    var stepsEl = document.querySelector('.steps-wrap');
+    if (stepsEl) stepsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 });
 </script>
