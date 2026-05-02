@@ -726,11 +726,13 @@
   </div>
 </div>
 <script>
-(function(){
+document.addEventListener('DOMContentLoaded', function(){
   var overlay = document.getElementById('fbOverlay');
   var closeBtn = document.getElementById('fbClose');
   var grabBtn = document.getElementById('fbGrabBtn');
   var KEY = 'bb_fb_dismissed';
+
+  if (!overlay || !closeBtn || !grabBtn) return;
 
   function closePopup() {
     overlay.classList.remove('active');
@@ -754,7 +756,7 @@
     closePopup();
     initFirstBowlFlow();
   });
-})();
+});
 </script>
 
 <nav id="main-nav">
