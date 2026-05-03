@@ -560,6 +560,248 @@
       .trust-review { flex: 0 0 230px; }
     }
 
+    /* ── BOWL INFO POPUP ── */
+    .bi-overlay {
+      position: fixed; inset: 0; z-index: 9998;
+      background: rgba(0,0,0,0);
+      pointer-events: none;
+      transition: background 0.35s ease;
+    }
+    .bi-overlay.active {
+      background: rgba(0,0,0,0.5);
+      pointer-events: auto;
+    }
+    .bi-sheet {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 9998;
+      max-height: 85vh;
+      background: var(--cream);
+      border-radius: 20px 20px 0 0;
+      overflow-y: auto;
+      padding: 0 0 32px;
+      transform: translateY(100%);
+      transition: transform 0.45s cubic-bezier(0.16,1,0.3,1);
+      box-shadow: 0 -4px 40px rgba(0,0,0,0.15);
+      -webkit-overflow-scrolling: touch;
+    }
+    .bi-overlay.active + .bi-sheet,
+    .bi-sheet.active {
+      transform: translateY(0);
+    }
+    .bi-handle-bar {
+      position: sticky; top: 0; z-index: 2;
+      background: var(--cream);
+      padding: 12px 0 8px;
+      text-align: center;
+      border-radius: 20px 20px 0 0;
+    }
+    .bi-handle {
+      width: 36px; height: 4px;
+      background: var(--warm-tan);
+      border-radius: 4px;
+      margin: 0 auto;
+    }
+    .bi-header {
+      padding: 4px 24px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .bi-header-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--dark);
+    }
+    .bi-close-btn {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: var(--red-pale);
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .bi-close-btn:hover { background: var(--red-blush); }
+    .bi-close-btn svg { width: 14px; height: 14px; stroke: var(--red); stroke-width: 2.5; }
+    .bi-cards {
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    /* Reuse bowl-card styles but full-width stacked */
+    .bowl-card {
+      flex-shrink: 0;
+      background: var(--white);
+      border-radius: 16px;
+      border: 1.5px solid rgba(173,55,55,0.1);
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      grid-template-rows: auto auto 1fr auto;
+      column-gap: 12px;
+      row-gap: 4px;
+      box-shadow: 0 2px 16px rgba(173,55,55,0.05);
+    }
+    .bowl-card-icon {
+      grid-column: 1; grid-row: 1;
+      font-size: 1.4rem; line-height: 1; padding-top: 2px;
+    }
+    .bowl-card-tag {
+      grid-column: 2; grid-row: 1;
+      font-size: 0.58rem; font-weight: 600;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--red); background: var(--red-pale);
+      display: inline-flex; align-items: center;
+      padding: 3px 8px; border-radius: 20px;
+      width: fit-content; align-self: center;
+    }
+    .bowl-card-headline {
+      grid-column: 1 / -1; grid-row: 2;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem; font-weight: 600;
+      color: var(--dark); line-height: 1.2; margin-top: 6px;
+    }
+    .bowl-card-body {
+      grid-column: 1 / -1; grid-row: 3;
+      font-size: 0.8rem; color: var(--mid);
+      line-height: 1.6; font-weight: 300; margin-top: 4px;
+    }
+    .bowl-card-stats, .bowl-card-pills, .bowl-card-badges {
+      grid-column: 1 / -1; grid-row: 4;
+      margin-top: 10px; padding-top: 10px;
+      border-top: 1px solid rgba(173,55,55,0.08);
+    }
+    .bowl-card-stats { display: flex; gap: 14px; flex-wrap: wrap; }
+    .bcs { display: flex; flex-direction: column; gap: 1px; }
+    .bcs-val {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem; font-weight: 600;
+      color: var(--red); line-height: 1;
+    }
+    .bcs-label {
+      font-size: 0.58rem; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--muted);
+    }
+    .bowl-card-pills { display: flex; flex-wrap: wrap; gap: 5px; }
+    .pill {
+      font-size: 0.68rem; padding: 3px 8px;
+      border-radius: 20px; border: 1.5px solid var(--red-blush);
+      color: var(--red-dark); font-weight: 500;
+    }
+    .bowl-card-badges { display: flex; flex-direction: column; gap: 5px; }
+    .badge-item { font-size: 0.76rem; color: var(--dark); font-weight: 400; }
+    .bi-cards .bowl-card {
+      width: 100%;
+      scroll-snap-align: unset;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+    .bi-sheet.active .bowl-card:nth-child(1) { transition-delay: 0.08s; }
+    .bi-sheet.active .bowl-card:nth-child(2) { transition-delay: 0.14s; }
+    .bi-sheet.active .bowl-card:nth-child(3) { transition-delay: 0.20s; }
+    .bi-sheet.active .bowl-card:nth-child(4) { transition-delay: 0.26s; }
+    .bi-sheet.active .bowl-card:nth-child(5) { transition-delay: 0.32s; }
+    .bi-sheet.active .bowl-card {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    /* Trigger link */
+    .bi-trigger-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--red);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 500;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      text-decoration: none;
+      transition: opacity 0.15s;
+    }
+    .bi-trigger-link:hover { opacity: 0.7; }
+    .bi-trigger-link svg { flex-shrink: 0; }
+
+    /* ── FIRST-BOWL BOTTOM BANNER ── */
+    .fb-bottom-banner {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 400;
+      background: var(--red);
+      color: #fff;
+      padding: 12px 52px 12px 16px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      font-family: 'Outfit', sans-serif;
+      box-shadow: 0 -2px 16px rgba(0,0,0,0.15);
+      transform: translateY(100%);
+      transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+    }
+    .fb-bottom-banner.visible {
+      display: flex;
+      transform: translateY(0);
+    }
+    .fb-bottom-banner-text {
+      font-size: 0.82rem;
+      font-weight: 500;
+      line-height: 1.3;
+    }
+    .fb-bottom-banner-text strong {
+      font-weight: 700;
+    }
+    .fb-bottom-banner-text .fb-bb-strike {
+      text-decoration: line-through;
+      opacity: 0.55;
+      font-size: 0.78rem;
+    }
+    .fb-bottom-banner-cta {
+      flex-shrink: 0;
+      background: #fff;
+      color: var(--red);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.12s;
+    }
+    .fb-bottom-banner-cta:active { transform: scale(0.96); }
+    .fb-bottom-banner-close {
+      position: absolute;
+      top: 50%; right: 14px;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: rgba(255,255,255,0.6);
+      font-size: 18px;
+      line-height: 1;
+      padding: 4px;
+    }
+    .fb-bottom-banner-close:hover { color: #fff; }
+    /* Push WA FAB up when banner is visible */
+    .fb-bottom-banner.visible ~ .wa-fab,
+    body.fb-banner-on .wa-fab {
+      bottom: 72px;
+      transition: bottom 0.4s cubic-bezier(0.16,1,0.3,1);
+    }
+    @media (max-width: 500px) {
+      .fb-bottom-banner { padding: 10px 44px 10px 12px; gap: 8px; }
+      .fb-bottom-banner-text { font-size: 0.76rem; }
+      .fb-bottom-banner-cta { font-size: 0.72rem; padding: 7px 12px; }
+      body.fb-banner-on .wa-fab { bottom: 66px; }
+    }
+
     /* ── FIRST-BOWL POPUP ── */
     .fb-overlay {
       position: fixed; inset: 0; z-index: 9999;
@@ -868,7 +1110,7 @@ document.addEventListener('DOMContentLoaded', function(){
     <div class="section-heading" style="margin-top:12px;">
       <div class="section-label" style="color:var(--red);font-weight:600;">🚨 Limited time · First bowl offer</div>
       <h2>Pick your <em>flavour.</em></h2>
-      <p style="color:var(--mid);font-size:0.88rem;margin-top:6px;">Choose 1 bowl — just ₹179 <span style="text-decoration:line-through;color:var(--muted);font-size:0.82rem;">₹399</span></p>
+      <p style="color:var(--mid);font-size:0.88rem;margin-top:6px;">Choose 1 bowl — just ₹179 <span style="text-decoration:line-through;color:var(--muted);font-size:0.82rem;">₹399</span> · <button class="bi-trigger-link" onclick="openBowlInfo()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>What's inside?</button></p>
     </div>
 
     <div class="flavour-grid" id="fb-flavour-grid"></div>
@@ -1019,6 +1261,7 @@ document.addEventListener('DOMContentLoaded', function(){
     <div class="section-heading" style="margin-top:12px;">
       <div class="section-label">One-time order</div>
       <h2>Pick your <em>bowls.</em></h2>
+      <p style="color:var(--mid);font-size:0.82rem;margin-top:4px;"><button class="bi-trigger-link" onclick="openBowlInfo()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>What's inside our bowls?</button></p>
     </div>
 
     <div class="pack-toggle">
@@ -2643,6 +2886,164 @@ window.addEventListener('load', function() {
     });
   }, 50);
 });
+</script>
+
+<!-- BOWL INFO POPUP -->
+<div class="bi-overlay" id="biOverlay"></div>
+<div class="bi-sheet" id="biSheet">
+  <div class="bi-handle-bar"><div class="bi-handle"></div></div>
+  <div class="bi-header">
+    <div class="bi-header-text">Inside every bowl</div>
+    <button class="bi-close-btn" id="biClose" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="bi-cards">
+    <div class="bowl-card">
+      <div class="bowl-card-icon">🥣</div>
+      <div class="bowl-card-tag">Macros</div>
+      <div class="bowl-card-headline">Balanced nutrition, every time</div>
+      <div class="bowl-card-body">Each bowl delivers a science-backed macro split — 15.8g protein, 35.7g carbs, and 9.4g healthy fats — designed to fuel any meal.</div>
+      <div class="bowl-card-stats">
+        <div class="bcs"><span class="bcs-val">15.8g</span><span class="bcs-label">Protein</span></div>
+        <div class="bcs"><span class="bcs-val">35.7g</span><span class="bcs-label">Carbs</span></div>
+        <div class="bcs"><span class="bcs-val">9.4g</span><span class="bcs-label">Fats</span></div>
+        <div class="bcs"><span class="bcs-val">320</span><span class="bcs-label">Calories</span></div>
+      </div>
+    </div>
+    <div class="bowl-card">
+      <div class="bowl-card-icon">🌾</div>
+      <div class="bowl-card-tag">Ingredients</div>
+      <div class="bowl-card-headline">Real food. Nothing hidden.</div>
+      <div class="bowl-card-body">Every ingredient is sourced locally and prepared fresh.</div>
+      <div class="bowl-card-pills">
+        <span class="pill">House-made yoghurt</span>
+        <span class="pill">Muesli</span>
+        <span class="pill">Fresh fruit &amp; pulp</span>
+        <span class="pill">Healthy toppings</span>
+      </div>
+    </div>
+    <div class="bowl-card">
+      <div class="bowl-card-icon">🚫</div>
+      <div class="bowl-card-tag">No preservatives</div>
+      <div class="bowl-card-headline">Zero preservatives, zero shortcuts.</div>
+      <div class="bowl-card-body">Zero preservatives, zero additives, zero compromises. We prep every bowl fresh on the day of delivery — which is why we only deliver Monday to Friday.</div>
+      <div class="bowl-card-badges">
+        <div class="badge-item">✓ No preservatives</div>
+        <div class="badge-item">✓ No artificial colours</div>
+        <div class="badge-item">✓ No added sugar</div>
+        <div class="badge-item">✓ No stabilisers</div>
+      </div>
+    </div>
+    <div class="bowl-card">
+      <div class="bowl-card-icon">🥛</div>
+      <div class="bowl-card-tag">The yogurt</div>
+      <div class="bowl-card-headline">Thick, creamy, protein-rich curd</div>
+      <div class="bowl-card-body">Our base is strained Greek-style curd — naturally high in protein and probiotics. It's not flavoured yogurt from a packet. It's real, made-in-house, and genuinely good.</div>
+      <div class="bowl-card-stats">
+        <div class="bcs"><span class="bcs-val">220g</span><span class="bcs-label">Bowl size</span></div>
+        <div class="bcs"><span class="bcs-val">Live</span><span class="bcs-label">Probiotics</span></div>
+        <div class="bcs"><span class="bcs-val">Daily</span><span class="bcs-label">Fresh prep</span></div>
+      </div>
+    </div>
+    <div class="bowl-card">
+      <div class="bowl-card-icon">🌿</div>
+      <div class="bowl-card-tag">Sourcing</div>
+      <div class="bowl-card-headline">Local, seasonal, responsible</div>
+      <div class="bowl-card-body">We source our fruit based on what's in season in Kerala — which means better flavour and fresher produce than anything flown in. You taste the difference.</div>
+      <div class="bowl-card-pills">
+        <span class="pill">Kochi-sourced</span>
+        <span class="pill">Seasonal fruit</span>
+        <span class="pill">Small-batch</span>
+        <span class="pill">Daily fresh</span>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function openBowlInfo() {
+  var overlay = document.getElementById('biOverlay');
+  var sheet = document.getElementById('biSheet');
+  overlay.classList.add('active');
+  sheet.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeBowlInfo() {
+  var overlay = document.getElementById('biOverlay');
+  var sheet = document.getElementById('biSheet');
+  overlay.classList.remove('active');
+  sheet.classList.remove('active');
+  document.body.style.overflow = '';
+}
+document.getElementById('biClose').addEventListener('click', closeBowlInfo);
+document.getElementById('biOverlay').addEventListener('click', closeBowlInfo);
+</script>
+
+<!-- FIRST-BOWL BOTTOM BANNER -->
+<div class="fb-bottom-banner" id="fbBottomBanner">
+  <div class="fb-bottom-banner-text">🚨 <strong>First bowl ₹179</strong> <span class="fb-bb-strike">₹399</span> · limited time</div>
+  <button class="fb-bottom-banner-cta" id="fbBottomCta">Grab it →</button>
+  <button class="fb-bottom-banner-close" id="fbBottomClose" aria-label="Close banner">✕</button>
+</div>
+<script>
+(function(){
+  var banner = document.getElementById('fbBottomBanner');
+  var cta = document.getElementById('fbBottomCta');
+  var closeBtn = document.getElementById('fbBottomClose');
+  var BANNER_KEY = 'bb_fb_banner_dismissed';
+
+  // Show banner after popup is dismissed (listen for popup close)
+  function showBanner() {
+    try { if (sessionStorage.getItem(BANNER_KEY)) return; } catch(e) {}
+    // Small delay so it slides in smoothly after popup fades
+    setTimeout(function(){
+      banner.style.display = 'flex';
+      document.body.classList.add('fb-banner-on');
+      // Force reflow then animate
+      banner.offsetHeight;
+      banner.classList.add('visible');
+    }, 300);
+  }
+
+  function hideBanner() {
+    banner.classList.remove('visible');
+    document.body.classList.remove('fb-banner-on');
+    try { sessionStorage.setItem(BANNER_KEY, '1'); } catch(e) {}
+    setTimeout(function(){ banner.style.display = 'none'; }, 400);
+  }
+
+  // Hook into popup dismissal — show banner when popup overlay loses .active
+  var overlay = document.getElementById('fbOverlay');
+  if (overlay) {
+    var obs = new MutationObserver(function(mutations) {
+      mutations.forEach(function(m) {
+        if (m.attributeName === 'class' && !overlay.classList.contains('active') && overlay._wasActive) {
+          showBanner();
+        }
+        overlay._wasActive = overlay.classList.contains('active');
+      });
+    });
+    obs.observe(overlay, { attributes: true });
+  }
+
+  // Also show if popup never appeared (e.g. sessionStorage had bb_fb_dismissed already)
+  setTimeout(function(){
+    try {
+      if (sessionStorage.getItem('bb_fb_dismissed') && !sessionStorage.getItem(BANNER_KEY)) {
+        showBanner();
+      }
+    } catch(e) {}
+  }, 3500);
+
+  closeBtn.addEventListener('click', hideBanner);
+
+  cta.addEventListener('click', function(){
+    hideBanner();
+    if (typeof initFirstBowlFlow === 'function') {
+      initFirstBowlFlow();
+    }
+  });
+})();
 </script>
 
 <!-- WhatsApp FAB -->
