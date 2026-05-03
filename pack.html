@@ -1013,6 +1013,7 @@ document.addEventListener('DOMContentLoaded', function(){
   // "Grab my first bowl" — bounce then launch first bowl flow
   grabBtn.addEventListener('click', function(e){
     e.preventDefault();
+    gtag('event', 'first_bowl_cta_click', { event_category: 'engagement', event_label: 'popup_grab_first_bowl_179' });
     grabBtn.classList.add('fb-bounce');
     setTimeout(function(){
       closePopup();
@@ -2962,6 +2963,7 @@ window.addEventListener('load', function() {
 </div>
 <script>
 function openBowlInfo() {
+  gtag('event', 'whats_inside_click', { event_category: 'engagement', event_label: 'bowl_ingredients_popup' });
   var overlay = document.getElementById('biOverlay');
   var sheet = document.getElementById('biSheet');
   overlay.classList.add('active');
@@ -3038,6 +3040,7 @@ document.getElementById('biOverlay').addEventListener('click', closeBowlInfo);
   closeBtn.addEventListener('click', hideBanner);
 
   cta.addEventListener('click', function(){
+    gtag('event', 'first_bowl_cta_click', { event_category: 'engagement', event_label: 'popup_grab_first_bowl_179' });
     hideBanner();
     if (typeof initFirstBowlFlow === 'function') {
       initFirstBowlFlow();
